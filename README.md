@@ -1,3 +1,3 @@
-# client_deployment_app
+# automation-dep-flutter-app
 
-A new Flutter project.
+This is the Flutter automation deployment app...

@@ -7,9 +7,10 @@ enum DeploymentStatus { initial, loading, success, failure }
 class OnboardingState extends Equatable {
   // Data for ClientDeploymentRequest
   final String clientName;
-  // NEW: Added to hold the selected database prefix.
   final String databaseTypePrefix;
   final List<CompanyInfo> companies;
+  // NEW: A separate property to hold the auto-generated test company.
+  final CompanyInfo? testCompany;
   final AdminUserInfo adminUser;
   final LicenseInfo license;
   final List<int> selectedModuleIds;
@@ -24,6 +25,7 @@ class OnboardingState extends Equatable {
     required this.clientName,
     required this.databaseTypePrefix,
     required this.companies,
+    this.testCompany, // Updated constructor
     required this.adminUser,
     required this.license,
     required this.selectedModuleIds,
@@ -37,9 +39,9 @@ class OnboardingState extends Equatable {
   factory OnboardingState.initial() {
     return OnboardingState(
       clientName: '',
-      // Set the default prefix.
       databaseTypePrefix: 'Pro',
       companies: const [],
+      testCompany: null, // Initial value is null
       adminUser: const AdminUserInfo(),
       license:
           LicenseInfo(endDate: DateTime.now().add(const Duration(days: 730))),
@@ -53,6 +55,7 @@ class OnboardingState extends Equatable {
     String? clientName,
     String? databaseTypePrefix,
     List<CompanyInfo>? companies,
+    CompanyInfo? testCompany, // Updated copyWith
     AdminUserInfo? adminUser,
     LicenseInfo? license,
     List<int>? selectedModuleIds,
@@ -65,6 +68,7 @@ class OnboardingState extends Equatable {
       clientName: clientName ?? this.clientName,
       databaseTypePrefix: databaseTypePrefix ?? this.databaseTypePrefix,
       companies: companies ?? this.companies,
+      testCompany: testCompany ?? this.testCompany,
       adminUser: adminUser ?? this.adminUser,
       license: license ?? this.license,
       selectedModuleIds: selectedModuleIds ?? this.selectedModuleIds,
@@ -80,6 +84,7 @@ class OnboardingState extends Equatable {
         clientName,
         databaseTypePrefix,
         companies,
+        testCompany, // Updated props
         adminUser,
         license,
         selectedModuleIds,

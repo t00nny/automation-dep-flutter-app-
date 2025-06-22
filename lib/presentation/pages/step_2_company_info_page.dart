@@ -24,7 +24,7 @@ class CompanyInfoPage extends StatelessWidget {
                 children: [
                   Flexible(
                     child: Text(
-                      'Add one or more companies. A "Test" version will be auto-generated.',
+                      'Add one or more companies. A Test company will be auto-generated for the first one.',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
@@ -40,10 +40,15 @@ class CompanyInfoPage extends StatelessWidget {
                 const Center(
                   child: Padding(
                     padding: EdgeInsets.all(32.0),
-                    child: Text('No companies added yet. Tap the + button to start.'),
+                    child: Text(
+                        'No companies added yet. Tap the + button to start.'),
                   ),
                 )
-              else
+              else ...[
+                // Section for User-Added Companies
+                Text('Companies',
+                    style: Theme.of(context).textTheme.titleLarge),
+                const Divider(),
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -53,10 +58,35 @@ class CompanyInfoPage extends StatelessWidget {
                     return CompanyInfoTile(
                       company: company,
                       onTap: () => context.push('/company-form', extra: index),
-                      onDelete: () => context.read<OnboardingCubit>().deleteCompany(index),
+                      onDelete: () =>
+                          context.read<OnboardingCubit>().deleteCompany(index),
                     );
                   },
                 ),
+                const SizedBox(height: 24),
+                // Section for the Test Company
+                if (state.testCompany != null) ...[
+                  Text('Test Environment',
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const Divider(),
+                  CompanyInfoTile(
+                    company: state.testCompany!,
+                    onTap: () {
+                      // Optionally, show a dialog that this cannot be edited.
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'The test company cannot be edited directly.'),
+                          backgroundColor: Colors.blueGrey,
+                        ),
+                      );
+                    },
+                    // Disable delete functionality for the test company tile.
+                    onDelete: () {},
+                    isTestCompany: true, // Pass a flag to hide delete icon
+                  ),
+                ]
+              ]
             ],
           ),
         );
@@ -69,35 +99,41 @@ class CompanyInfoTile extends StatelessWidget {
   final CompanyInfo company;
   final VoidCallback onTap;
   final VoidCallback onDelete;
+  final bool isTestCompany;
 
   const CompanyInfoTile({
     super.key,
     required this.company,
     required this.onTap,
     required this.onDelete,
+    this.isTestCompany = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        title: Text(company.companyName, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(company.companyName,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(company.city.isNotEmpty && company.country.isNotEmpty
             ? '${company.city}, ${company.country}'
             : 'No location details'),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit, color: Colors.blueGrey),
-              onPressed: onTap,
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-              onPressed: onDelete,
-            ),
-          ],
-        ),
+        trailing: isTestCompany
+            ? const Icon(Icons.science_outlined, color: Colors.blueGrey)
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blueGrey),
+                    onPressed: onTap,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline,
+                        color: Colors.redAccent),
+                    onPressed: onDelete,
+                  ),
+                ],
+              ),
         onTap: onTap,
       ),
     );

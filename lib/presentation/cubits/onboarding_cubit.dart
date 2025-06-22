@@ -20,20 +20,26 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     emit(state.copyWith(clientName: name));
   }
 
-  // NEW: Method to update the database prefix.
   void updateDatabasePrefix(String prefix) {
     emit(state.copyWith(databaseTypePrefix: prefix));
   }
 
   void addCompany(CompanyInfo company) {
-    final List<CompanyInfo> updatedCompanies = List.from(state.companies);
+    final updatedCompanies = List<CompanyInfo>.from(state.companies);
     updatedCompanies.add(company);
 
-    final testCompany =
-        company.copyWith(companyName: '${company.companyName} Test');
-    updatedCompanies.add(testCompany);
-
-    emit(state.copyWith(companies: updatedCompanies));
+    // If this is the first company being added, create the special test company.
+    if (state.companies.isEmpty) {
+      final testCompany =
+          company.copyWith(companyName: 'Test ${state.clientName}');
+      emit(state.copyWith(
+        companies: updatedCompanies,
+        testCompany: testCompany,
+      ));
+    } else {
+      // Otherwise, just add the new company.
+      emit(state.copyWith(companies: updatedCompanies));
+    }
   }
 
   void updateCompany(int index, CompanyInfo company) {
@@ -45,10 +51,19 @@ class OnboardingCubit extends Cubit<OnboardingState> {
   }
 
   void deleteCompany(int index) {
-    final List<CompanyInfo> updatedCompanies = List.from(state.companies);
+    final updatedCompanies = List<CompanyInfo>.from(state.companies);
     if (index < updatedCompanies.length) {
       updatedCompanies.removeAt(index);
-      emit(state.copyWith(companies: updatedCompanies));
+
+      // If the last company is removed, also remove the test company.
+      if (updatedCompanies.isEmpty) {
+        emit(state.copyWith(
+          companies: updatedCompanies,
+          testCompany: null, // Set testCompany to null
+        ));
+      } else {
+        emit(state.copyWith(companies: updatedCompanies));
+      }
     }
   }
 
@@ -105,11 +120,16 @@ class OnboardingCubit extends Cubit<OnboardingState> {
   Future<void> submitDeployment() async {
     emit(state.copyWith(deploymentStatus: DeploymentStatus.loading));
 
+    // Combine the main companies and the test company for the deployment request.
+    final allCompanies = List<CompanyInfo>.from(state.companies);
+    if (state.testCompany != null) {
+      allCompanies.add(state.testCompany!);
+    }
+
     final request = ClientDeploymentRequest(
       clientName: state.clientName,
-      // Pass the selected prefix to the request object.
       databaseTypePrefix: state.databaseTypePrefix,
-      companies: state.companies,
+      companies: allCompanies, // Send the combined list
       adminUser: state.adminUser,
       license: state.license,
       selectedModuleIds: state.selectedModuleIds,

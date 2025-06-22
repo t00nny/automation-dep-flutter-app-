@@ -14,6 +14,8 @@ class ModulesPage extends StatelessWidget {
       builder: (context, state) {
         return WizardScaffold(
           title: 'Step 6: Select Modules',
+          currentStep: 6,
+          totalSteps: 7,
           onNext: () => context.push('/review'),
           nextButtonText: 'Review',
           body: Column(
@@ -31,18 +33,41 @@ class ModulesPage extends StatelessWidget {
                   final moduleId = entry.key;
                   final moduleName = entry.value;
                   final isSelected = state.selectedModuleIds.contains(moduleId);
-                  final isMandatory = moduleId == AppConstants.userManagementModuleId;
+                  final isMandatory =
+                      moduleId == AppConstants.userManagementModuleId;
 
                   return Card(
-                    elevation: isSelected ? 4 : 1,
-                    color: isSelected ? Theme.of(context).colorScheme.primary.withOpacity(0.1) : null,
+                    elevation: isSelected ? 2 : 1,
+                    // FIXED: Replaced deprecated withOpacity
+                    color: isSelected
+                        ? Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withAlpha((255 * 0.1).round())
+                        : null,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: isSelected
+                          ? BorderSide(
+                              color: Theme.of(context).colorScheme.primary)
+                          : BorderSide(color: Colors.grey.shade200),
+                    ),
                     child: CheckboxListTile(
-                      title: Text(moduleName, style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                      title: Text(moduleName,
+                          style: TextStyle(
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal)),
                       value: isSelected,
-                      onChanged: isMandatory ? null : (bool? value) {
-                        context.read<OnboardingCubit>().toggleModule(moduleId);
-                      },
+                      onChanged: isMandatory
+                          ? null
+                          : (bool? value) {
+                              context
+                                  .read<OnboardingCubit>()
+                                  .toggleModule(moduleId);
+                            },
                       controlAffinity: ListTileControlAffinity.leading,
+                      activeColor: Theme.of(context).colorScheme.primary,
                     ),
                   );
                 }).toList(),

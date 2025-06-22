@@ -14,6 +14,8 @@ class CompanyInfoPage extends StatelessWidget {
       builder: (context, state) {
         return WizardScaffold(
           title: 'Step 2: Company Info',
+          currentStep: 2,
+          totalSteps: 7,
           isNextEnabled: state.companies.isNotEmpty,
           onNext: () => context.push('/step3'),
           body: Column(
@@ -45,10 +47,8 @@ class CompanyInfoPage extends StatelessWidget {
                   ),
                 )
               else ...[
-                // Section for User-Added Companies
                 Text('Companies',
                     style: Theme.of(context).textTheme.titleLarge),
-                const Divider(),
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -64,15 +64,12 @@ class CompanyInfoPage extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 24),
-                // Section for the Test Company
                 if (state.testCompany != null) ...[
                   Text('Test Environment',
                       style: Theme.of(context).textTheme.titleLarge),
-                  const Divider(),
                   CompanyInfoTile(
                     company: state.testCompany!,
                     onTap: () {
-                      // Optionally, show a dialog that this cannot be edited.
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
@@ -81,9 +78,8 @@ class CompanyInfoPage extends StatelessWidget {
                         ),
                       );
                     },
-                    // Disable delete functionality for the test company tile.
                     onDelete: () {},
-                    isTestCompany: true, // Pass a flag to hide delete icon
+                    isTestCompany: true,
                   ),
                 ]
               ]
@@ -111,7 +107,18 @@ class CompanyInfoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
+      // FIXED: Replaced deprecated withOpacity
+      color: isTestCompany
+          ? theme.colorScheme.secondary.withAlpha((255 * 0.05).round())
+          : null,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: isTestCompany
+            ? BorderSide(color: theme.colorScheme.secondary, width: 1.5)
+            : BorderSide(color: Colors.grey.shade200),
+      ),
       child: ListTile(
         title: Text(company.companyName,
             style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -119,7 +126,7 @@ class CompanyInfoTile extends StatelessWidget {
             ? '${company.city}, ${company.country}'
             : 'No location details'),
         trailing: isTestCompany
-            ? const Icon(Icons.science_outlined, color: Colors.blueGrey)
+            ? Icon(Icons.science_outlined, color: theme.colorScheme.secondary)
             : Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

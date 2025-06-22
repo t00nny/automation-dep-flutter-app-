@@ -73,7 +73,8 @@ class _CompanyFormPageState extends State<CompanyFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.companyIndex == null ? 'Add Company' : 'Edit Company'),
+        title:
+            Text(widget.companyIndex == null ? 'Add Company' : 'Edit Company'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -85,33 +86,39 @@ class _CompanyFormPageState extends State<CompanyFormPage> {
               CustomTextFormField(
                 controller: _nameController,
                 labelText: 'Company Name',
+                prefixIcon: Icons.business_outlined, // ADDED
                 validator: (val) => val!.isEmpty ? 'Required field' : null,
               ),
               const SizedBox(height: 16),
               CustomTextFormField(
                 controller: _address1Controller,
                 labelText: 'Address',
+                prefixIcon: Icons.location_on_outlined, // ADDED
               ),
               const SizedBox(height: 16),
               CustomTextFormField(
                 controller: _cityController,
                 labelText: 'City',
+                prefixIcon: Icons.location_city_outlined, // ADDED
               ),
               const SizedBox(height: 16),
               CustomTextFormField(
                 controller: _countryController,
                 labelText: 'Country',
+                prefixIcon: Icons.flag_outlined, // ADDED
               ),
               const SizedBox(height: 16),
               CustomTextFormField(
                 controller: _phoneController,
                 labelText: 'Phone Number',
+                prefixIcon: Icons.phone_outlined, // ADDED
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 32),
-              ElevatedButton(
+              ElevatedButton.icon(
                 onPressed: _onSave,
-                child: const Text('Save Company'),
+                icon: const Icon(Icons.save),
+                label: const Text('Save Company'),
               ),
             ],
           ),

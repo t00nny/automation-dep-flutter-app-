@@ -24,6 +24,8 @@ class _ClientDetailsPageState extends State<ClientDetailsPage> {
           key: _formKey,
           child: WizardScaffold(
             title: 'Step 1: Client Details',
+            currentStep: 1, // ADDED
+            totalSteps: 7, // ADDED
             isNextEnabled: state.clientName.isNotEmpty,
             onNext: () {
               if (_formKey.currentState!.validate()) {
@@ -40,6 +42,7 @@ class _ClientDetailsPageState extends State<ClientDetailsPage> {
                 const SizedBox(height: 24),
                 CustomTextFormField(
                   labelText: 'Client Name',
+                  prefixIcon: Icons.business_center_outlined, // ADDED
                   initialValue: state.clientName,
                   onChanged: (value) {
                     context.read<OnboardingCubit>().updateClientName(value);
@@ -55,12 +58,13 @@ class _ClientDetailsPageState extends State<ClientDetailsPage> {
                   },
                 ),
                 const SizedBox(height: 24),
-                // NEW: Dropdown for selecting the Database Prefix.
                 DropdownButtonFormField<String>(
                   value: state.databaseTypePrefix,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
+                    // MODIFIED for consistency
                     labelText: 'Database Prefix',
-                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.dns_outlined,
+                        color: Theme.of(context).primaryColor),
                   ),
                   items: AppConstants.databasePrefixes
                       .map((prefix) => DropdownMenuItem(

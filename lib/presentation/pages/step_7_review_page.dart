@@ -5,124 +5,167 @@ import 'package:intl/intl.dart';
 import 'package:client_deployment_app/core/constants.dart';
 import 'package:client_deployment_app/presentation/cubits/onboarding_cubit.dart';
 
-class ReviewPage extends StatelessWidget {
+class ReviewPage extends StatefulWidget {
   const ReviewPage({super.key});
+
+  @override
+  State<ReviewPage> createState() => _ReviewPageState();
+}
+
+class _ReviewPageState extends State<ReviewPage> {
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<OnboardingCubit>().state;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Review & Deploy')),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      _ReviewSection(
-                        title: 'Client Details',
-                        onEdit: () => context.go('/step1'),
-                        children: [
-                          _buildReviewRow('Client Name:', state.clientName),
-                          // ADDED: Display the selected prefix.
-                          _buildReviewRow(
-                              'DB Prefix:', state.databaseTypePrefix),
-                        ],
-                      ),
-                      _ReviewSection(
-                        title: 'Companies',
-                        onEdit: () => context.go('/step2'),
-                        children: state.companies
-                            .map((c) => _buildReviewRow(
+    return BlocListener<OnboardingCubit, OnboardingState>(
+      listener: (context, state) {
+        if (state.deploymentStatus != DeploymentStatus.loading && _isLoading) {
+          if (mounted) {
+            setState(() => _isLoading = false);
+            context.go('/result');
+          }
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Step 7: Review & Deploy')),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        _ReviewSection(
+                          title: 'Client Details',
+                          isEditingEnabled: !_isLoading, // MODIFIED
+                          onEdit: () => context.go('/step1'),
+                          children: [
+                            _buildReviewRow('Client Name:', state.clientName),
+                            _buildReviewRow(
+                                'DB Prefix:', state.databaseTypePrefix),
+                          ],
+                        ),
+                        _ReviewSection(
+                          title: 'Companies',
+                          isEditingEnabled: !_isLoading, // MODIFIED
+                          onEdit: () => context.go('/step2'),
+                          children: [
+                            ...state.companies.map((c) => _buildReviewRow(
                                 '• ${c.companyName}',
                                 c.city.isNotEmpty
                                     ? '${c.city}, ${c.country}'
-                                    : c.address1))
-                            .toList(),
-                      ),
-                      _ReviewSection(
-                        title: 'Admin Credentials',
-                        onEdit: () => context.go('/step3'),
-                        children: [
-                          _buildReviewRow('Email:', state.adminUser.email),
-                          _buildReviewRow(
-                              'Contact:', state.adminUser.contactNumber),
-                          _buildReviewRow('Password:', '********'),
-                        ],
-                      ),
-                      _ReviewSection(
-                        title: 'License',
-                        onEdit: () => context.go('/step4'),
-                        children: [
-                          _buildReviewRow(
-                              'Users:', state.license.numberOfUsers.toString()),
-                          _buildReviewRow('End Date:',
-                              DateFormat.yMMMd().format(state.license.endDate)),
-                          _buildReviewRow('New Encryption:',
-                              state.license.usesNewEncryption ? 'Yes' : 'No'),
-                        ],
-                      ),
-                      _ReviewSection(
-                        title: 'System URLs',
-                        onEdit: () => context.go('/step5'),
-                        children: [
-                          _buildReviewRow(
-                              'CRM:',
-                              state.urls.crmurl.isEmpty
-                                  ? 'Not Set'
-                                  : state.urls.crmurl),
-                          _buildReviewRow(
-                              'Trading:',
-                              state.urls.tradingURL.isEmpty
-                                  ? 'Not Set'
-                                  : state.urls.tradingURL),
-                          _buildReviewRow(
-                              'Integration:',
-                              state.urls.integrationURL.isEmpty
-                                  ? 'Not Set'
-                                  : state.urls.integrationURL),
-                        ],
-                      ),
-                      _ReviewSection(
-                        title: 'Selected Modules',
-                        onEdit: () => context.go('/step6'),
-                        children: state.selectedModuleIds
-                            .map((id) => _buildReviewRow(
-                                '•',
-                                AppConstants.systemModules[id] ??
-                                    'Unknown Module'))
-                            .toList(),
-                      ),
-                    ],
+                                    : c.address1)),
+                            if (state.testCompany != null)
+                              _buildReviewRow(
+                                  '• ${state.testCompany!.companyName}',
+                                  '(Test Environment)'),
+                          ],
+                        ),
+                        _ReviewSection(
+                          title: 'Admin Credentials',
+                          isEditingEnabled: !_isLoading, // MODIFIED
+                          onEdit: () => context.go('/step3'),
+                          children: [
+                            _buildReviewRow('Email:', state.adminUser.email),
+                            _buildReviewRow(
+                                'Contact:', state.adminUser.contactNumber),
+                            _buildReviewRow('Password:', '********'),
+                          ],
+                        ),
+                        _ReviewSection(
+                          title: 'License',
+                          isEditingEnabled: !_isLoading, // MODIFIED
+                          onEdit: () => context.go('/step4'),
+                          children: [
+                            _buildReviewRow('Users:',
+                                state.license.numberOfUsers.toString()),
+                            _buildReviewRow(
+                                'End Date:',
+                                DateFormat.yMMMd()
+                                    .format(state.license.endDate)),
+                            _buildReviewRow('New Encryption:',
+                                state.license.usesNewEncryption ? 'Yes' : 'No'),
+                          ],
+                        ),
+                        _ReviewSection(
+                          title: 'System URLs',
+                          isEditingEnabled: !_isLoading, // MODIFIED
+                          onEdit: () => context.go('/step5'),
+                          children: [
+                            _buildReviewRow(
+                                'CRM:',
+                                state.urls.crmurl.isEmpty
+                                    ? 'Not Set'
+                                    : state.urls.crmurl),
+                            _buildReviewRow(
+                                'Trading:',
+                                state.urls.tradingURL.isEmpty
+                                    ? 'Not Set'
+                                    : state.urls.tradingURL),
+                            _buildReviewRow(
+                                'Integration:',
+                                state.urls.integrationURL.isEmpty
+                                    ? 'Not Set'
+                                    : state.urls.integrationURL),
+                          ],
+                        ),
+                        _ReviewSection(
+                          title: 'Selected Modules',
+                          isEditingEnabled: !_isLoading, // MODIFIED
+                          onEdit: () => context.go('/step6'),
+                          children: state.selectedModuleIds
+                              .map((id) => _buildReviewRow(
+                                  '•',
+                                  AppConstants.systemModules[id] ??
+                                      'Unknown Module'))
+                              .toList(),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                      onPressed: () => context.pop(),
-                      child: const Text('Back')),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.rocket_launch),
-                    label: const Text('Deploy Client'),
-                    onPressed: () {
-                      context.read<OnboardingCubit>().submitDeployment();
-                      context.push('/deploying');
-                    },
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 15)),
-                  ),
-                ],
-              ),
-            ],
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                        onPressed: _isLoading ? null : () => context.pop(),
+                        child: const Text('Back')),
+                    ElevatedButton.icon(
+                      icon: _isLoading
+                          ? Container(
+                              width: 24,
+                              height: 24,
+                              padding: const EdgeInsets.all(2.0),
+                              child: const CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 3,
+                              ),
+                            )
+                          : const Icon(Icons.rocket_launch),
+                      label:
+                          Text(_isLoading ? 'Deploying...' : 'Deploy Client'),
+                      onPressed: _isLoading
+                          ? null
+                          : () {
+                              setState(() => _isLoading = true);
+                              context
+                                  .read<OnboardingCubit>()
+                                  .submitDeployment();
+                            },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 15)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -151,9 +194,14 @@ class _ReviewSection extends StatelessWidget {
   final String title;
   final VoidCallback onEdit;
   final List<Widget> children;
+  final bool isEditingEnabled; // ADDED
 
-  const _ReviewSection(
-      {required this.title, required this.onEdit, required this.children});
+  const _ReviewSection({
+    required this.title,
+    required this.onEdit,
+    required this.children,
+    this.isEditingEnabled = true, // ADDED
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -169,9 +217,10 @@ class _ReviewSection extends StatelessWidget {
               children: [
                 Text(title, style: Theme.of(context).textTheme.titleLarge),
                 TextButton.icon(
+                  // MODIFIED: Disable the button when isEditingEnabled is false
+                  onPressed: isEditingEnabled ? onEdit : null,
                   icon: const Icon(Icons.edit, size: 18),
                   label: const Text('Edit'),
-                  onPressed: onEdit,
                 ),
               ],
             ),

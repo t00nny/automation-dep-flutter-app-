@@ -13,6 +13,8 @@ class UrlsPage extends StatelessWidget {
     final urls = context.read<OnboardingCubit>().state.urls;
     return WizardScaffold(
       title: 'Step 5: System URLs',
+      currentStep: 5, // ADDED
+      totalSteps: 7, // ADDED
       onNext: () => context.push('/step6'),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -24,6 +26,7 @@ class UrlsPage extends StatelessWidget {
           const SizedBox(height: 24),
           CustomTextFormField(
             labelText: 'CRM URL',
+            prefixIcon: Icons.link, // ADDED
             initialValue: urls.crmurl,
             onChanged: (value) =>
                 context.read<OnboardingCubit>().updateUrls(crmUrl: value),
@@ -32,6 +35,7 @@ class UrlsPage extends StatelessWidget {
           const SizedBox(height: 16),
           CustomTextFormField(
             labelText: 'Trading URL',
+            prefixIcon: Icons.link, // ADDED
             initialValue: urls.tradingURL,
             onChanged: (value) =>
                 context.read<OnboardingCubit>().updateUrls(tradingUrl: value),
@@ -40,6 +44,7 @@ class UrlsPage extends StatelessWidget {
           const SizedBox(height: 16),
           CustomTextFormField(
             labelText: 'Integration URL',
+            prefixIcon: Icons.link, // ADDED
             initialValue: urls.integrationURL,
             onChanged: (value) => context
                 .read<OnboardingCubit>()

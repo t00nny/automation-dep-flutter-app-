@@ -28,6 +28,8 @@ class LicensePage extends StatelessWidget {
       builder: (context, state) {
         return WizardScaffold(
           title: 'Step 4: License',
+          currentStep: 4, // ADDED
+          totalSteps: 7, // ADDED
           onNext: () => context.push('/step5'),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,24 +41,28 @@ class LicensePage extends StatelessWidget {
               const SizedBox(height: 24),
               CustomTextFormField(
                 labelText: 'Number of Users',
+                prefixIcon: Icons.group_outlined, // ADDED
                 initialValue: state.license.numberOfUsers.toString(),
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
                   final users = int.tryParse(value);
                   if (users != null) {
-                    context.read<OnboardingCubit>().updateLicenseInfo(numberOfUsers: users);
+                    context
+                        .read<OnboardingCubit>()
+                        .updateLicenseInfo(numberOfUsers: users);
                   }
                 },
               ),
               const SizedBox(height: 24),
               ListTile(
                 title: const Text('License End Date'),
-                subtitle: Text(DateFormat.yMMMd().format(state.license.endDate)),
+                subtitle:
+                    Text(DateFormat.yMMMd().format(state.license.endDate)),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () => _selectDate(context),
                 shape: RoundedRectangleBorder(
                   side: BorderSide(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
               const SizedBox(height: 16),
@@ -64,13 +70,16 @@ class LicensePage extends StatelessWidget {
                 title: const Text('Use New Encryption'),
                 value: state.license.usesNewEncryption,
                 onChanged: (bool value) {
-                  context.read<OnboardingCubit>().updateLicenseInfo(usesNewEncryption: value);
+                  context
+                      .read<OnboardingCubit>()
+                      .updateLicenseInfo(usesNewEncryption: value);
                 },
                 secondary: const Icon(Icons.enhanced_encryption),
                 shape: RoundedRectangleBorder(
                   side: BorderSide(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                activeColor: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),

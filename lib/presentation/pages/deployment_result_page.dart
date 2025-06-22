@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:client_deployment_app/presentation/cubits/onboarding_cubit.dart';
 import 'package:client_deployment_app/core/utils/report_generator.dart';
+// import 'package:lottie/lottie.dart'; // REMOVED Lottie import
 
 class DeploymentResultPage extends StatelessWidget {
   const DeploymentResultPage({super.key});
@@ -17,8 +18,10 @@ class DeploymentResultPage extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(isSuccess ? 'Deployment Successful' : 'Deployment Failed'),
-            backgroundColor: isSuccess ? Colors.green.shade700 : colorScheme.error,
+            title:
+                Text(isSuccess ? 'Deployment Successful' : 'Deployment Failed'),
+            backgroundColor:
+                isSuccess ? Colors.green.shade700 : colorScheme.error,
             automaticallyImplyLeading: false,
           ),
           body: Padding(
@@ -27,9 +30,13 @@ class DeploymentResultPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // FIXED: Replaced Lottie with a static Icon to prevent asset errors.
                   Icon(
-                    isSuccess ? Icons.check_circle_outline : Icons.error_outline,
-                    color: isSuccess ? Colors.green.shade700 : colorScheme.error,
+                    isSuccess
+                        ? Icons.check_circle_outline
+                        : Icons.error_outline,
+                    color:
+                        isSuccess ? Colors.green.shade700 : colorScheme.error,
                     size: 100,
                   ),
                   const SizedBox(height: 20),
@@ -44,24 +51,28 @@ class DeploymentResultPage extends StatelessWidget {
                   if (result != null) ...[
                     if (!isSuccess && result.errorMessage.isNotEmpty)
                       Card(
-                        color: colorScheme.error.withOpacity(0.1),
+                        color: colorScheme.error.withAlpha((255 * 0.1).round()),
                         child: Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: Text(
                             result.errorMessage,
-                            style: TextStyle(color: colorScheme.error, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                color: colorScheme.error,
+                                fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
                     const SizedBox(height: 16),
-                    Text('Deployment Log:', style: Theme.of(context).textTheme.titleMedium),
+                    Text('Deployment Log:',
+                        style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.all(12),
                       height: 250,
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withAlpha((255 * 0.05).round()),
                         borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade300),
                       ),
                       child: ListView.builder(
                         itemCount: result.logMessages.length,

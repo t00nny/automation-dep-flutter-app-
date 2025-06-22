@@ -9,7 +9,7 @@ import 'package:client_deployment_app/presentation/pages/step_4_license_page.dar
 import 'package:client_deployment_app/presentation/pages/step_5_urls_page.dart';
 import 'package:client_deployment_app/presentation/pages/step_6_modules_page.dart';
 import 'package:client_deployment_app/presentation/pages/step_7_review_page.dart';
-import 'package:client_deployment_app/presentation/pages/deployment_progress_page.dart';
+// import 'package:client_deployment_app/presentation/pages/deployment_progress_page.dart'; // REMOVED
 import 'package:client_deployment_app/presentation/pages/deployment_result_page.dart';
 
 class AppRouter {
@@ -17,9 +17,13 @@ class AppRouter {
     initialLocation: '/splash',
     routes: [
       GoRoute(path: '/splash', builder: (context, state) => const SplashPage()),
-      GoRoute(path: '/welcome', builder: (context, state) => const WelcomePage()),
-      GoRoute(path: '/step1', builder: (context, state) => const ClientDetailsPage()),
-      GoRoute(path: '/step2', builder: (context, state) => const CompanyInfoPage()),
+      GoRoute(
+          path: '/welcome', builder: (context, state) => const WelcomePage()),
+      GoRoute(
+          path: '/step1',
+          builder: (context, state) => const ClientDetailsPage()),
+      GoRoute(
+          path: '/step2', builder: (context, state) => const CompanyInfoPage()),
       GoRoute(
         path: '/company-form',
         builder: (context, state) {
@@ -27,13 +31,17 @@ class AppRouter {
           return CompanyFormPage(companyIndex: index);
         },
       ),
-      GoRoute(path: '/step3', builder: (context, state) => const AdminCredentialsPage()),
+      GoRoute(
+          path: '/step3',
+          builder: (context, state) => const AdminCredentialsPage()),
       GoRoute(path: '/step4', builder: (context, state) => const LicensePage()),
       GoRoute(path: '/step5', builder: (context, state) => const UrlsPage()),
       GoRoute(path: '/step6', builder: (context, state) => const ModulesPage()),
       GoRoute(path: '/review', builder: (context, state) => const ReviewPage()),
-      GoRoute(path: '/deploying', builder: (context, state) => const DeploymentProgressPage()),
-      GoRoute(path: '/result', builder: (context, state) => const DeploymentResultPage()),
+      // GoRoute(path: '/deploying', builder: (context, state) => const DeploymentProgressPage()), // REMOVED
+      GoRoute(
+          path: '/result',
+          builder: (context, state) => const DeploymentResultPage()),
     ],
   );
 }

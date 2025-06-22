@@ -1,3 +1,5 @@
+// lib/main.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:client_deployment_app/core/di.dart' as di;
@@ -24,7 +26,8 @@ class ClientDeploymentApp extends StatelessWidget {
     return BlocProvider(
       create: (context) => di.sl<OnboardingCubit>(),
       child: MaterialApp.router(
-        title: 'Client Deployment',
+        // MODIFIED: Changed the app title
+        title: 'Deploy 360',
         theme: AppTheme.lightTheme,
         debugShowCheckedModeBanner: false,
         routerConfig: AppRouter.router,

@@ -17,13 +17,18 @@ class _AdminCredentialsPageState extends State<AdminCredentialsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final adminUser = context.select((OnboardingCubit cubit) => cubit.state.adminUser);
+    final adminUser =
+        context.select((OnboardingCubit cubit) => cubit.state.adminUser);
 
     return Form(
       key: _formKey,
       child: WizardScaffold(
         title: 'Step 3: Admin Credentials',
-        isNextEnabled: adminUser.email.isNotEmpty && adminUser.password.isNotEmpty && adminUser.contactNumber.isNotEmpty,
+        currentStep: 3,
+        totalSteps: 7,
+        isNextEnabled: adminUser.email.isNotEmpty &&
+            adminUser.password.isNotEmpty &&
+            adminUser.contactNumber.isNotEmpty,
         onNext: () {
           if (_formKey.currentState!.validate()) {
             context.push('/step4');
@@ -39,32 +44,58 @@ class _AdminCredentialsPageState extends State<AdminCredentialsPage> {
             const SizedBox(height: 24),
             CustomTextFormField(
               labelText: 'Admin Email',
+              prefixIcon: Icons.email_outlined,
               initialValue: adminUser.email,
-              onChanged: (value) => context.read<OnboardingCubit>().updateAdminInfo(email: value),
+              onChanged: (value) =>
+                  context.read<OnboardingCubit>().updateAdminInfo(email: value),
               keyboardType: TextInputType.emailAddress,
               validator: (value) {
-                if (value == null || value.isEmpty) return 'Email is required.';
-                if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) return 'Enter a valid email.';
+                // FIXED: Added curly braces
+                if (value == null || value.isEmpty) {
+                  return 'Email is required.';
+                }
+                // FIXED: Added curly braces
+                if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                  return 'Enter a valid email.';
+                }
                 return null;
               },
             ),
             const SizedBox(height: 16),
             CustomTextFormField(
               labelText: 'Admin Contact Number',
+              prefixIcon: Icons.phone_outlined,
               initialValue: adminUser.contactNumber,
-              onChanged: (value) => context.read<OnboardingCubit>().updateAdminInfo(contactNumber: value),
+              onChanged: (value) => context
+                  .read<OnboardingCubit>()
+                  .updateAdminInfo(contactNumber: value),
               keyboardType: TextInputType.phone,
-               validator: (val) => val!.isEmpty ? 'Contact number is required.' : null,
+              validator: (val) {
+                // FIXED: Added curly braces
+                if (val!.isEmpty) {
+                  return 'Contact number is required.';
+                }
+                return null;
+              },
             ),
             const SizedBox(height: 16),
             CustomTextFormField(
               labelText: 'Password',
+              prefixIcon: Icons.password_outlined,
               initialValue: adminUser.password,
               obscureText: true,
-              onChanged: (value) => context.read<OnboardingCubit>().updateAdminInfo(password: value),
+              onChanged: (value) => context
+                  .read<OnboardingCubit>()
+                  .updateAdminInfo(password: value),
               validator: (value) {
-                if (value == null || value.isEmpty) return 'Password is required.';
-                if (value.length < 6) return 'Password must be at least 6 characters.';
+                // FIXED: Added curly braces
+                if (value == null || value.isEmpty) {
+                  return 'Password is required.';
+                }
+                // FIXED: Added curly braces
+                if (value.length < 6) {
+                  return 'Password must be at least 6 characters.';
+                }
                 return null;
               },
             ),

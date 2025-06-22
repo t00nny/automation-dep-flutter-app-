@@ -112,7 +112,8 @@ class ReportGenerator {
           style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
         ),
         pw.SizedBox(height: 5),
-        pw.Table.fromTextArray(
+        // FIXED: Replaced deprecated method
+        pw.TableHelper.fromTextArray(
           headers: ['Type', 'Database Name'],
           data: [
             if (result.clientHubDatabase.isNotEmpty)

@@ -39,18 +39,19 @@ dev_dependencies:
   # ADDED: Package for generating launcher icons
   flutter_launcher_icons: ^0.13.1
 
+# ADDED: Configuration for the launcher icons package
+flutter_launcher_icons:
+  # This section configures the package for both Android and iOS
+  android: "launcher_icon"
+  ios: true
+  # IMPORTANT: This is the path to the icon you added in Step 1
+  image_path: "assets/icon/app_icon.png"
+  # Ensures the icon works with modern Android versions' adaptive icons
+  min_sdk_android: 21 
+
 flutter:
   uses-material-design: true
   
-  # To add assets to your application, uncomment the following lines
-  # and create the listed directories in your project root.
+  # To add assets to your application, uncomment the following lines.
   assets:
-    - assets/icon/ # Make sure this directory is listed to access the icon path below
-
-
-# ADDED: Configuration for the launcher icons package
-flutter_launcher_icons:
-  android: "launcher_icon"
-  ios: true
-  image_path: "assets/icon/app_icon.png"
-  min_sdk_android: 21
+    - assets/icon/

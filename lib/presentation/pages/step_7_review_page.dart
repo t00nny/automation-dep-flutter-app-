@@ -2,234 +2,620 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:client_deployment_app/core/constants.dart';
 import 'package:client_deployment_app/presentation/cubits/onboarding_cubit.dart';
+import 'package:client_deployment_app/presentation/widgets/wizard_scaffold.dart';
+import 'package:client_deployment_app/core/constants.dart';
 
-class ReviewPage extends StatefulWidget {
+class ReviewPage extends StatelessWidget {
   const ReviewPage({super.key});
 
   @override
-  State<ReviewPage> createState() => _ReviewPageState();
-}
-
-class _ReviewPageState extends State<ReviewPage> {
-  bool _isLoading = false;
-
-  @override
   Widget build(BuildContext context) {
-    final state = context.watch<OnboardingCubit>().state;
-
-    return BlocListener<OnboardingCubit, OnboardingState>(
+    return BlocConsumer<OnboardingCubit, OnboardingState>(
       listener: (context, state) {
-        if (state.deploymentStatus != DeploymentStatus.loading && _isLoading) {
-          if (mounted) {
-            setState(() => _isLoading = false);
-            context.go('/result');
-          }
+        if (state.deploymentStatus == DeploymentStatus.success ||
+            state.deploymentStatus == DeploymentStatus.failure) {
+          context.go('/result');
         }
       },
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Step 7: Review & Deploy')),
-        body: SafeArea(
-          child: Padding(
+      builder: (context, state) {
+        final isDeploying = state.deploymentStatus == DeploymentStatus.loading;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Review & Deploy'),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: isDeploying
+                  ? null
+                  : () => context
+                      .pop(), // UPDATED: Disable back button during deployment
+            ),
+          ),
+          body: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        _ReviewSection(
-                          title: 'Client Details',
-                          isEditingEnabled: !_isLoading, // MODIFIED
-                          onEdit: () => context.go('/step1'),
-                          children: [
-                            _buildReviewRow('Client Name:', state.clientName),
-                            _buildReviewRow(
-                                'DB Prefix:', state.databaseTypePrefix),
-                          ],
-                        ),
-                        _ReviewSection(
-                          title: 'Companies',
-                          isEditingEnabled: !_isLoading, // MODIFIED
-                          onEdit: () => context.go('/step2'),
-                          children: [
-                            ...state.companies.map((c) => _buildReviewRow(
-                                '• ${c.companyName}',
-                                c.city.isNotEmpty
-                                    ? '${c.city}, ${c.country}'
-                                    : c.address1)),
-                            if (state.testCompany != null)
-                              _buildReviewRow(
-                                  '• ${state.testCompany!.companyName}',
-                                  '(Test Environment)'),
-                          ],
-                        ),
-                        _ReviewSection(
-                          title: 'Admin Credentials',
-                          isEditingEnabled: !_isLoading, // MODIFIED
-                          onEdit: () => context.go('/step3'),
-                          children: [
-                            _buildReviewRow('Email:', state.adminUser.email),
-                            _buildReviewRow(
-                                'Contact:', state.adminUser.contactNumber),
-                            _buildReviewRow('Password:', '********'),
-                          ],
-                        ),
-                        _ReviewSection(
-                          title: 'License',
-                          isEditingEnabled: !_isLoading, // MODIFIED
-                          onEdit: () => context.go('/step4'),
-                          children: [
-                            _buildReviewRow('Users:',
-                                state.license.numberOfUsers.toString()),
-                            _buildReviewRow(
-                                'End Date:',
-                                DateFormat.yMMMd()
-                                    .format(state.license.endDate)),
-                            _buildReviewRow('New Encryption:',
-                                state.license.usesNewEncryption ? 'Yes' : 'No'),
-                          ],
-                        ),
-                        _ReviewSection(
-                          title: 'System URLs',
-                          isEditingEnabled: !_isLoading, // MODIFIED
-                          onEdit: () => context.go('/step5'),
-                          children: [
-                            _buildReviewRow(
-                                'CRM:',
-                                state.urls.crmurl.isEmpty
-                                    ? 'Not Set'
-                                    : state.urls.crmurl),
-                            _buildReviewRow(
-                                'Trading:',
-                                state.urls.tradingURL.isEmpty
-                                    ? 'Not Set'
-                                    : state.urls.tradingURL),
-                            _buildReviewRow(
-                                'Integration:',
-                                state.urls.integrationURL.isEmpty
-                                    ? 'Not Set'
-                                    : state.urls.integrationURL),
-                          ],
-                        ),
-                        _ReviewSection(
-                          title: 'Selected Modules',
-                          isEditingEnabled: !_isLoading, // MODIFIED
-                          onEdit: () => context.go('/step6'),
-                          children: state.selectedModuleIds
-                              .map((id) => _buildReviewRow(
-                                  '•',
-                                  AppConstants.systemModules[id] ??
-                                      'Unknown Module'))
-                              .toList(),
-                        ),
+                // Header Section
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).primaryColor,
+                        Theme.of(context).primaryColor.withOpacity(0.8),
                       ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isDeploying
+                            ? 'Deploying Configuration'
+                            : 'Review Configuration', // UPDATED: Dynamic title
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        isDeploying
+                            ? 'Please wait while we deploy your client environment...'
+                            : 'Please review all settings before deploying the client environment.',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Progress indicator
+                      Row(
+                        children: [
+                          Icon(
+                            isDeploying ? Icons.sync : Icons.check_circle,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            isDeploying
+                                ? 'Deployment in Progress...'
+                                : 'Step 7 of 7 - Final Review',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.9),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                        onPressed: _isLoading ? null : () => context.pop(),
-                        child: const Text('Back')),
-                    ElevatedButton.icon(
-                      icon: _isLoading
-                          ? Container(
-                              width: 24,
-                              height: 24,
-                              padding: const EdgeInsets.all(2.0),
-                              child: const CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 3,
+
+                const SizedBox(height: 24),
+
+                // Client Information
+                _buildSectionCard(
+                  context,
+                  'Client Information',
+                  Icons.business,
+                  '/step1',
+                  isDeploying, // UPDATED: Pass deployment status
+                  [
+                    _buildInfoRow('Client Name', state.clientName),
+                    _buildInfoRow('Database Prefix', state.databaseTypePrefix),
+                  ],
+                ),
+
+                // Company Information
+                _buildSectionCard(
+                  context,
+                  'Company Information',
+                  Icons.domain,
+                  '/step2',
+                  isDeploying, // UPDATED: Pass deployment status
+                  [
+                    _buildInfoRow(
+                      'Companies',
+                      '${state.companies.length + (state.testCompany != null ? 1 : 0)} configured',
+                    ),
+                    const SizedBox(height: 12),
+                    ...state.companies.asMap().entries.map((entry) {
+                      final company = entry.value;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              company.companyName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
                               ),
-                            )
-                          : const Icon(Icons.rocket_launch),
-                      label:
-                          Text(_isLoading ? 'Deploying...' : 'Deploy Client'),
-                      onPressed: _isLoading
-                          ? null
-                          : () {
-                              setState(() => _isLoading = true);
-                              context
-                                  .read<OnboardingCubit>()
-                                  .submitDeployment();
-                            },
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
+                            ),
+                            if (company.city.isNotEmpty &&
+                                company.country.isNotEmpty)
+                              Text(
+                                '${company.city}, ${company.country}',
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    }),
+                    if (state.testCompany != null)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.green.shade200),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              state.testCompany!.companyName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                            Text(
+                              'Auto-generated test company',
+                              style: TextStyle(
+                                color: Colors.green.shade600,
+                                fontSize: 12,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+
+                // Administrator Information
+                _buildSectionCard(
+                  context,
+                  'Administrator Information',
+                  Icons.admin_panel_settings,
+                  '/step3',
+                  isDeploying, // UPDATED: Pass deployment status
+                  [
+                    _buildInfoRow('Email', state.adminUser.email),
+                    _buildInfoRow(
+                        'Contact Number', state.adminUser.contactNumber),
+                    _buildInfoRow('Branch', state.adminUser.branch),
+                    _buildInfoRow('Password', '••••••••'),
+                  ],
+                ),
+
+                // License Information
+                _buildSectionCard(
+                  context,
+                  'License Information',
+                  Icons.card_membership,
+                  '/step4',
+                  isDeploying, // UPDATED: Pass deployment status
+                  [
+                    _buildInfoRow('Number of Users',
+                        state.license.numberOfUsers.toString()),
+                    _buildInfoRow('License End Date',
+                        DateFormat.yMMMd().format(state.license.endDate)),
+                    _buildInfoRow(
+                        'New Encryption',
+                        state.license.usesNewEncryption
+                            ? 'Enabled'
+                            : 'Disabled'),
+                  ],
+                ),
+
+                // URL Configuration
+                _buildSectionCard(
+                  context,
+                  'URL Configuration',
+                  Icons.link,
+                  '/step5',
+                  isDeploying, // UPDATED: Pass deployment status
+                  [
+                    _buildUrlConfigurationSection(state.urls),
+                  ],
+                ),
+
+                // Module Selection
+                _buildSectionCard(
+                  context,
+                  'Selected Modules',
+                  Icons.extension,
+                  '/step6',
+                  isDeploying, // UPDATED: Pass deployment status
+                  [
+                    _buildInfoRow('Modules',
+                        '${state.selectedModuleIds.length} selected'),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: state.selectedModuleIds.map((moduleId) {
+                        final moduleName =
+                            AppConstants.systemModules[moduleId] ??
+                                'Unknown Module';
+                        return Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 15)),
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color:
+                                Theme.of(context).primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Theme.of(context)
+                                  .primaryColor
+                                  .withOpacity(0.3),
+                            ),
+                          ),
+                          child: Text(
+                            moduleName,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildReviewRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(label,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-          ),
-          Expanded(child: Text(value)),
-        ],
-      ),
-    );
-  }
-}
+                const SizedBox(height: 32),
 
-class _ReviewSection extends StatelessWidget {
-  final String title;
-  final VoidCallback onEdit;
-  final List<Widget> children;
-  final bool isEditingEnabled; // ADDED
-
-  const _ReviewSection({
-    required this.title,
-    required this.onEdit,
-    required this.children,
-    this.isEditingEnabled = true, // ADDED
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(title, style: Theme.of(context).textTheme.titleLarge),
-                TextButton.icon(
-                  // MODIFIED: Disable the button when isEditingEnabled is false
-                  onPressed: isEditingEnabled ? onEdit : null,
-                  icon: const Icon(Icons.edit, size: 18),
-                  label: const Text('Edit'),
+                // Deploy Button
+                Container(
+                  width: double.infinity,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isDeploying
+                          ? [Colors.grey.shade400, Colors.grey.shade500]
+                          : [
+                              Theme.of(context).primaryColor,
+                              Theme.of(context).primaryColor.withOpacity(0.8),
+                            ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(context).primaryColor.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ElevatedButton(
+                    onPressed: isDeploying
+                        ? null
+                        : () {
+                            context.read<OnboardingCubit>().submitDeployment();
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: isDeploying
+                        ? const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                ),
+                              ),
+                              SizedBox(width: 16),
+                              Text(
+                                'Deploying Client Environment...',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          )
+                        : const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.rocket_launch, color: Colors.white),
+                              SizedBox(width: 12),
+                              Text(
+                                'Deploy Client Environment',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
                 ),
+
+                const SizedBox(height: 24),
               ],
             ),
-            const Divider(),
-            const SizedBox(height: 8),
-            ...children,
+          ),
+        );
+      },
+    );
+  }
+
+  // UPDATED: Added isDeploying parameter to disable edit buttons during deployment
+  Widget _buildSectionCard(
+    BuildContext context,
+    String title,
+    IconData icon,
+    String editRoute,
+    bool isDeploying, // UPDATED: New parameter
+    List<Widget> children,
+  ) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          children: [
+            // Header with edit button
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isDeploying
+                    ? Colors.grey.shade100
+                    : Colors.grey
+                        .shade50, // UPDATED: Different color when deploying
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    icon,
+                    color: isDeploying
+                        ? Colors.grey.shade500
+                        : Theme.of(context)
+                            .primaryColor, // UPDATED: Grey when deploying
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: isDeploying
+                            ? Colors.grey.shade600
+                            : Theme.of(context)
+                                .primaryColor, // UPDATED: Grey when deploying
+                      ),
+                    ),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: isDeploying
+                        ? null
+                        : () => context.push(
+                            editRoute), // UPDATED: Disabled when deploying
+                    icon: const Icon(Icons.edit, size: 16),
+                    label: const Text('Edit'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: isDeploying
+                          ? Colors.grey.shade400
+                          : Theme.of(context)
+                              .primaryColor, // UPDATED: Grey when disabled
+                      side: BorderSide(
+                        color: isDeploying
+                            ? Colors.grey.shade300
+                            : Theme.of(context)
+                                .primaryColor, // UPDATED: Grey border when disabled
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Content
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: children,
+              ),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 140,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Colors.black54,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUrlConfigurationSection(urls) {
+    final enabledCount = _getEnabledUrlCount(urls);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade100,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            '$enabledCount of 10 URLs configured',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.blue.shade700,
+              fontSize: 12,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // URL Grid
+        Column(
+          children: [
+            _buildUrlRow('Web Portal', urls.webURLEnabled, urls.webURL),
+            _buildUrlRow('API Service', urls.apiURLEnabled, urls.apiURL),
+            _buildUrlRow('CRM System', urls.crmurlEnabled, urls.crmurl),
+            _buildUrlRow(
+                'Procurement', urls.procurementURLEnabled, urls.procurementURL),
+            _buildUrlRow('Reports', urls.reportsURLEnabled, urls.reportsURL),
+            _buildUrlRow('Leasing', urls.leasingURLEnabled, urls.leasingURL),
+            _buildUrlRow('Trading', urls.tradingURLEnabled, urls.tradingURL),
+            _buildUrlRow(
+                'Integration', urls.integrationURLEnabled, urls.integrationURL),
+            _buildUrlRow('F&B POS', urls.fnbPosURLEnabled, urls.fnbPosURL),
+            _buildUrlRow(
+                'Retail POS', urls.retailPOSUrlEnabled, urls.retailPOSUrl),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildUrlRow(String serviceName, bool isEnabled, String url) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isEnabled ? Colors.green.shade50 : Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isEnabled ? Colors.green.shade200 : Colors.grey.shade200,
+        ),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              serviceName,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: isEnabled ? Colors.green.shade100 : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              isEnabled ? 'Enabled' : 'Disabled',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: isEnabled ? Colors.green.shade700 : Colors.grey.shade600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              isEnabled ? url : 'Not configured',
+              style: TextStyle(
+                fontSize: 11,
+                color: isEnabled ? Colors.black87 : Colors.grey.shade500,
+                fontStyle: isEnabled ? FontStyle.normal : FontStyle.italic,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _getEnabledUrlCount(urls) {
+    int count = 0;
+    if (urls.webURLEnabled) count++;
+    if (urls.apiURLEnabled) count++;
+    if (urls.crmurlEnabled) count++;
+    if (urls.procurementURLEnabled) count++;
+    if (urls.reportsURLEnabled) count++;
+    if (urls.leasingURLEnabled) count++;
+    if (urls.tradingURLEnabled) count++;
+    if (urls.integrationURLEnabled) count++;
+    if (urls.fnbPosURLEnabled) count++;
+    if (urls.retailPOSUrlEnabled) count++;
+    return count;
   }
 }

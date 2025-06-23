@@ -4,9 +4,14 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:client_deployment_app/domain/entities/deployment_entities.dart';
+import 'package:client_deployment_app/core/constants.dart';
+import 'package:intl/intl.dart';
 
 class ReportGenerator {
-  static Future<void> generateAndShareReport(DeploymentResult result) async {
+  static Future<void> generateAndShareReport(
+    DeploymentResult result,
+    ClientDeploymentRequest request,
+  ) async {
     final pdf = pw.Document();
 
     pdf.addPage(
@@ -14,15 +19,19 @@ class ReportGenerator {
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
         build: (context) => [
-          _buildHeader(result),
+          _buildHeader(request),
           pw.SizedBox(height: 20),
           _buildSummary(result),
           pw.SizedBox(height: 20),
+          _buildClientInformation(request),
+          pw.SizedBox(height: 20),
+          _buildAdministratorCredentials(request.adminUser),
+          pw.SizedBox(height: 20),
+          _buildDeploymentConfiguration(request),
           if (result.isSuccess) ...[
-            _buildDatabasesSection(result),
             pw.SizedBox(height: 20),
+            _buildDatabasesSection(result),
           ],
-          _buildLogSection(result.logMessages),
           if (!result.isSuccess) ...[
             pw.SizedBox(height: 20),
             _buildErrorSection(result.errorMessage),
@@ -41,22 +50,36 @@ class ReportGenerator {
     );
   }
 
-  static pw.Widget _buildHeader(DeploymentResult result) {
+  static pw.Widget _buildHeader(ClientDeploymentRequest request) {
     return pw.Header(
       level: 0,
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(
-            'Client Deployment Report',
-            style: pw.TextStyle(
-              fontSize: 24,
-              fontWeight: pw.FontWeight.bold,
-            ),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(
+                'Client Deployment Report',
+                style: pw.TextStyle(
+                  fontSize: 24,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.Text(
+                DateTime.now().toIso8601String().split('T').first,
+                style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey),
+              ),
+            ],
           ),
+          pw.SizedBox(height: 8),
           pw.Text(
-            DateTime.now().toIso8601String().split('T').first,
-            style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey),
+            'Client: ${request.clientName}',
+            style: pw.TextStyle(
+              fontSize: 16,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.blue800,
+            ),
           ),
         ],
       ),
@@ -68,7 +91,8 @@ class ReportGenerator {
       padding: const pw.EdgeInsets.all(16),
       decoration: pw.BoxDecoration(
         border: pw.Border.all(color: PdfColors.grey300),
-        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
+        borderRadius: const pw.BorderRadius.all(
+            pw.Radius.circular(8)), // FIXED: Removed const
         color: result.isSuccess ? PdfColors.green50 : PdfColors.red50,
       ),
       child: pw.Column(
@@ -94,8 +118,196 @@ class ReportGenerator {
               ),
             ],
           ),
+          pw.SizedBox(height: 5),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text('Deployment Date:',
+                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+              pw.Text(DateFormat('MMM dd, yyyy HH:mm').format(DateTime.now())),
+            ],
+          ),
         ],
       ),
+    );
+  }
+
+  static pw.Widget _buildClientInformation(ClientDeploymentRequest request) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text(
+          'Client Information',
+          style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+        ),
+        pw.Divider(height: 10, color: PdfColors.grey400),
+        pw.SizedBox(height: 10),
+        _buildInfoRow('Client Name:', request.clientName),
+        _buildInfoRow('Database Prefix:', request.databaseTypePrefix),
+        pw.SizedBox(height: 10),
+        pw.Text(
+          'Companies:',
+          style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+        ),
+        pw.SizedBox(height: 5),
+        ...request.companies.map((company) => pw.Padding(
+              padding: const pw.EdgeInsets.only(left: 20, bottom: 4),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text('• ${company.companyName}',
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                  if (company.address1.isNotEmpty)
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.only(left: 10),
+                      child: pw.Text('Address: ${company.address1}'),
+                    ),
+                  if (company.city.isNotEmpty && company.country.isNotEmpty)
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.only(left: 10),
+                      child: pw.Text(
+                          'Location: ${company.city}, ${company.country}'),
+                    ),
+                  if (company.phoneNumber.isNotEmpty)
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.only(left: 10),
+                      child: pw.Text('Phone: ${company.phoneNumber}'),
+                    ),
+                ],
+              ),
+            )),
+      ],
+    );
+  }
+
+  static pw.Widget _buildAdministratorCredentials(AdminUserInfo adminUser) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(16),
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(color: PdfColors.orange300),
+        borderRadius: const pw.BorderRadius.all(
+            pw.Radius.circular(8)), // FIXED: Removed const
+        color: PdfColors.orange50,
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Row(
+            children: [
+              pw.Icon(const pw.IconData(0xe88f),
+                  size: 20, color: PdfColors.orange800),
+              pw.SizedBox(width: 8),
+              pw.Text(
+                'Administrator Access Credentials',
+                style: pw.TextStyle(
+                  fontSize: 18,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.orange800,
+                ),
+              ),
+            ],
+          ),
+          pw.Divider(height: 10, color: PdfColors.orange300),
+          pw.SizedBox(height: 5),
+          pw.Text(
+            'CONFIDENTIAL - Handle with care',
+            style: pw.TextStyle(
+              fontSize: 10,
+              fontStyle: pw.FontStyle.italic,
+              color: PdfColors.orange700,
+            ),
+          ),
+          pw.SizedBox(height: 10),
+          _buildInfoRow('Email:', adminUser.email),
+          _buildInfoRow('Contact Number:', adminUser.contactNumber),
+          _buildInfoRow('Branch:', adminUser.branch),
+          _buildInfoRow('Password:', adminUser.password, isPassword: true),
+        ],
+      ),
+    );
+  }
+
+  static pw.Widget _buildDeploymentConfiguration(
+      ClientDeploymentRequest request) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text(
+          'Deployment Configuration',
+          style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+        ),
+        pw.Divider(height: 10, color: PdfColors.grey400),
+        pw.SizedBox(height: 10),
+
+        // License Information
+        pw.Text(
+          'License Information:',
+          style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+        ),
+        pw.SizedBox(height: 5),
+        _buildInfoRow(
+            '  Number of Users:', request.license.numberOfUsers.toString()),
+        _buildInfoRow('  License End Date:',
+            DateFormat.yMMMd().format(request.license.endDate)),
+        _buildInfoRow('  New Encryption:',
+            request.license.usesNewEncryption ? 'Enabled' : 'Disabled'),
+
+        pw.SizedBox(height: 10),
+
+        // System URLs
+        pw.Text(
+          'System URLs:',
+          style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+        ),
+        pw.SizedBox(height: 5),
+        _buildInfoRow(
+            '  CRM URL:',
+            request.urls.crmurl.isEmpty
+                ? 'Not configured'
+                : request.urls.crmurl),
+        _buildInfoRow(
+            '  Trading URL:',
+            request.urls.tradingURL.isEmpty
+                ? 'Not configured'
+                : request.urls.tradingURL),
+        _buildInfoRow(
+            '  Integration URL:',
+            request.urls.integrationURL.isEmpty
+                ? 'Not configured'
+                : request.urls.integrationURL),
+
+        pw.SizedBox(height: 10),
+
+        // Selected Modules
+        pw.Text(
+          'Enabled Modules:',
+          style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+        ),
+        pw.SizedBox(height: 5),
+        pw.Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: request.selectedModuleIds.map((moduleId) {
+            final moduleName =
+                AppConstants.systemModules[moduleId] ?? 'Unknown Module';
+            return pw.Container(
+              padding:
+                  const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: pw.BoxDecoration(
+                color: PdfColors.blue100,
+                borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(4)), // FIXED: Removed const
+                border: pw.Border.all(color: PdfColors.blue300),
+              ),
+              child: pw.Text(
+                moduleName,
+                style:
+                    const pw.TextStyle(fontSize: 10, color: PdfColors.blue800),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 
@@ -112,7 +324,6 @@ class ReportGenerator {
           style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
         ),
         pw.SizedBox(height: 5),
-        // FIXED: Replaced deprecated method
         pw.TableHelper.fromTextArray(
           headers: ['Type', 'Database Name'],
           data: [
@@ -124,33 +335,6 @@ class ReportGenerator {
           headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
           cellAlignment: pw.Alignment.centerLeft,
           cellPadding: const pw.EdgeInsets.all(5),
-        ),
-      ],
-    );
-  }
-
-  static pw.Widget _buildLogSection(List<String> logMessages) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(
-          'Deployment Log',
-          style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
-        ),
-        pw.SizedBox(height: 5),
-        pw.Container(
-          padding: const pw.EdgeInsets.all(10),
-          decoration: pw.BoxDecoration(
-            border: pw.Border.all(color: PdfColors.grey300),
-            borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
-          ),
-          child: pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: logMessages
-                .map((log) =>
-                    pw.Text('• $log', style: const pw.TextStyle(fontSize: 10)))
-                .toList(),
-          ),
         ),
       ],
     );
@@ -173,7 +357,8 @@ class ReportGenerator {
           padding: const pw.EdgeInsets.all(10),
           decoration: pw.BoxDecoration(
             border: pw.Border.all(color: PdfColors.red),
-            borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
+            borderRadius: const pw.BorderRadius.all(
+                pw.Radius.circular(5)), // FIXED: Removed const
             color: PdfColors.red50,
           ),
           child: pw.Text(
@@ -182,6 +367,40 @@ class ReportGenerator {
           ),
         ),
       ],
+    );
+  }
+
+  static pw.Widget _buildInfoRow(String label, String value,
+      {bool isPassword = false}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 2),
+      child: pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.SizedBox(
+            width: 120,
+            child: pw.Text(
+              label,
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+            ),
+          ),
+          pw.Expanded(
+            child: isPassword
+                ? pw.Container(
+                    color: PdfColors.yellow100,
+                    padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 4, vertical: 2),
+                    child: pw.Text(
+                      value,
+                      style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  )
+                : pw.Text(value),
+          ),
+        ],
+      ),
     );
   }
 }

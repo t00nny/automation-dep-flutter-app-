@@ -143,6 +143,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
           ? DeploymentStatus.success
           : DeploymentStatus.failure,
       deploymentResult: result,
+      deploymentRequest: request, // ADDED: Store the deployment request
       errorMessage: result.errorMessage,
     ));
   }

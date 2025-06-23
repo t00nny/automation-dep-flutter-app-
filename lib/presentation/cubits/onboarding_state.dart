@@ -19,19 +19,22 @@ class OnboardingState extends Equatable {
   // UI-specific state
   final DeploymentStatus deploymentStatus;
   final DeploymentResult? deploymentResult;
+  final ClientDeploymentRequest?
+      deploymentRequest; // ADDED: Store the deployment request
   final String? errorMessage;
 
   const OnboardingState({
     required this.clientName,
     required this.databaseTypePrefix,
     required this.companies,
-    this.testCompany, // Updated constructor
+    this.testCompany,
     required this.adminUser,
     required this.license,
     required this.selectedModuleIds,
     required this.urls,
     this.deploymentStatus = DeploymentStatus.initial,
     this.deploymentResult,
+    this.deploymentRequest, // ADDED
     this.errorMessage,
   });
 
@@ -41,12 +44,13 @@ class OnboardingState extends Equatable {
       clientName: '',
       databaseTypePrefix: 'Pro',
       companies: const [],
-      testCompany: null, // Initial value is null
+      testCompany: null,
       adminUser: const AdminUserInfo(),
       license:
           LicenseInfo(endDate: DateTime.now().add(const Duration(days: 730))),
       selectedModuleIds: const [5], // Pre-select User Management
       urls: const CompanyUrls(),
+      deploymentRequest: null, // ADDED
     );
   }
 
@@ -55,13 +59,14 @@ class OnboardingState extends Equatable {
     String? clientName,
     String? databaseTypePrefix,
     List<CompanyInfo>? companies,
-    CompanyInfo? testCompany, // Updated copyWith
+    CompanyInfo? testCompany,
     AdminUserInfo? adminUser,
     LicenseInfo? license,
     List<int>? selectedModuleIds,
     CompanyUrls? urls,
     DeploymentStatus? deploymentStatus,
     DeploymentResult? deploymentResult,
+    ClientDeploymentRequest? deploymentRequest, // ADDED
     String? errorMessage,
   }) {
     return OnboardingState(
@@ -75,6 +80,7 @@ class OnboardingState extends Equatable {
       urls: urls ?? this.urls,
       deploymentStatus: deploymentStatus ?? this.deploymentStatus,
       deploymentResult: deploymentResult ?? this.deploymentResult,
+      deploymentRequest: deploymentRequest ?? this.deploymentRequest, // ADDED
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -84,13 +90,14 @@ class OnboardingState extends Equatable {
         clientName,
         databaseTypePrefix,
         companies,
-        testCompany, // Updated props
+        testCompany,
         adminUser,
         license,
         selectedModuleIds,
         urls,
         deploymentStatus,
         deploymentResult,
+        deploymentRequest, // ADDED
         errorMessage,
       ];
 }

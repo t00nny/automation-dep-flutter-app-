@@ -139,25 +139,136 @@ class LicenseInfo extends Equatable {
   List<Object?> get props => [endDate, numberOfUsers, usesNewEncryption];
 }
 
+// UPDATED: Comprehensive URL configuration with enable/disable functionality
 class CompanyUrls extends Equatable {
+  final String webURL;
+  final bool webURLEnabled;
+  final String apiURL;
+  final bool apiURLEnabled;
   final String crmurl;
+  final bool crmurlEnabled;
+  final String procurementURL;
+  final bool procurementURLEnabled;
+  final String reportsURL;
+  final bool reportsURLEnabled;
+  final String leasingURL;
+  final bool leasingURLEnabled;
   final String tradingURL;
+  final bool tradingURLEnabled;
   final String integrationURL;
+  final bool integrationURLEnabled;
+  final String fnbPosURL;
+  final bool fnbPosURLEnabled;
+  final String retailPOSUrl;
+  final bool retailPOSUrlEnabled;
 
   const CompanyUrls({
-    this.crmurl = '',
-    this.tradingURL = '',
-    this.integrationURL = '',
+    this.webURL = 'https://web.pro360erp.com',
+    this.webURLEnabled = true,
+    this.apiURL = 'https://api.pro360erp.com',
+    this.apiURLEnabled = true,
+    this.crmurl = 'https://crm.pro360erp.com',
+    this.crmurlEnabled = true,
+    this.procurementURL = 'https://proc.pro360erp.com',
+    this.procurementURLEnabled = true,
+    this.reportsURL = 'https://reports.pro360erp.com',
+    this.reportsURLEnabled = true,
+    this.leasingURL = 'https://lease.pro360erp.com',
+    this.leasingURLEnabled = true,
+    this.tradingURL = 'https://trading.pro360erp.com',
+    this.tradingURLEnabled = true,
+    this.integrationURL = 'https://integration.apps.pro360erp.com',
+    this.integrationURLEnabled = true,
+    this.fnbPosURL = 'https://pos.pro360erp.com',
+    this.fnbPosURLEnabled = true,
+    this.retailPOSUrl = 'https://retail.apps.pro360erp.com',
+    this.retailPOSUrlEnabled = true,
   });
 
+  CompanyUrls copyWith({
+    String? webURL,
+    bool? webURLEnabled,
+    String? apiURL,
+    bool? apiURLEnabled,
+    String? crmurl,
+    bool? crmurlEnabled,
+    String? procurementURL,
+    bool? procurementURLEnabled,
+    String? reportsURL,
+    bool? reportsURLEnabled,
+    String? leasingURL,
+    bool? leasingURLEnabled,
+    String? tradingURL,
+    bool? tradingURLEnabled,
+    String? integrationURL,
+    bool? integrationURLEnabled,
+    String? fnbPosURL,
+    bool? fnbPosURLEnabled,
+    String? retailPOSUrl,
+    bool? retailPOSUrlEnabled,
+  }) {
+    return CompanyUrls(
+      webURL: webURL ?? this.webURL,
+      webURLEnabled: webURLEnabled ?? this.webURLEnabled,
+      apiURL: apiURL ?? this.apiURL,
+      apiURLEnabled: apiURLEnabled ?? this.apiURLEnabled,
+      crmurl: crmurl ?? this.crmurl,
+      crmurlEnabled: crmurlEnabled ?? this.crmurlEnabled,
+      procurementURL: procurementURL ?? this.procurementURL,
+      procurementURLEnabled:
+          procurementURLEnabled ?? this.procurementURLEnabled,
+      reportsURL: reportsURL ?? this.reportsURL,
+      reportsURLEnabled: reportsURLEnabled ?? this.reportsURLEnabled,
+      leasingURL: leasingURL ?? this.leasingURL,
+      leasingURLEnabled: leasingURLEnabled ?? this.leasingURLEnabled,
+      tradingURL: tradingURL ?? this.tradingURL,
+      tradingURLEnabled: tradingURLEnabled ?? this.tradingURLEnabled,
+      integrationURL: integrationURL ?? this.integrationURL,
+      integrationURLEnabled:
+          integrationURLEnabled ?? this.integrationURLEnabled,
+      fnbPosURL: fnbPosURL ?? this.fnbPosURL,
+      fnbPosURLEnabled: fnbPosURLEnabled ?? this.fnbPosURLEnabled,
+      retailPOSUrl: retailPOSUrl ?? this.retailPOSUrl,
+      retailPOSUrlEnabled: retailPOSUrlEnabled ?? this.retailPOSUrlEnabled,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
-        'crmurl': crmurl,
-        'tradingURL': tradingURL,
-        'integrationURL': integrationURL,
+        'webURL': webURLEnabled ? webURL : '',
+        'apiURL': apiURLEnabled ? apiURL : '',
+        'crmurl': crmurlEnabled ? crmurl : '',
+        'procurementURL': procurementURLEnabled ? procurementURL : '',
+        'reportsURL': reportsURLEnabled ? reportsURL : '',
+        'leasingURL': leasingURLEnabled ? leasingURL : '',
+        'tradingURL': tradingURLEnabled ? tradingURL : '',
+        'integrationURL': integrationURLEnabled ? integrationURL : '',
+        'fnbPosURL': fnbPosURLEnabled ? fnbPosURL : '',
+        'retailPOSUrl': retailPOSUrlEnabled ? retailPOSUrl : '',
       };
 
   @override
-  List<Object?> get props => [crmurl, tradingURL, integrationURL];
+  List<Object?> get props => [
+        webURL,
+        webURLEnabled,
+        apiURL,
+        apiURLEnabled,
+        crmurl,
+        crmurlEnabled,
+        procurementURL,
+        procurementURLEnabled,
+        reportsURL,
+        reportsURLEnabled,
+        leasingURL,
+        leasingURLEnabled,
+        tradingURL,
+        tradingURLEnabled,
+        integrationURL,
+        integrationURLEnabled,
+        fnbPosURL,
+        fnbPosURLEnabled,
+        retailPOSUrl,
+        retailPOSUrlEnabled,
+      ];
 }
 
 class DeploymentResult extends Equatable {

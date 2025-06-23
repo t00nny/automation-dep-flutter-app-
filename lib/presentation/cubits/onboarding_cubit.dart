@@ -28,7 +28,6 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     final updatedCompanies = List<CompanyInfo>.from(state.companies);
     updatedCompanies.add(company);
 
-    // If this is the first company being added, create the special test company.
     if (state.companies.isEmpty) {
       final testCompany =
           company.copyWith(companyName: 'Test ${state.clientName}');
@@ -37,7 +36,6 @@ class OnboardingCubit extends Cubit<OnboardingState> {
         testCompany: testCompany,
       ));
     } else {
-      // Otherwise, just add the new company.
       emit(state.copyWith(companies: updatedCompanies));
     }
   }
@@ -55,11 +53,10 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     if (index < updatedCompanies.length) {
       updatedCompanies.removeAt(index);
 
-      // If the last company is removed, also remove the test company.
       if (updatedCompanies.isEmpty) {
         emit(state.copyWith(
           companies: updatedCompanies,
-          testCompany: null, // Set testCompany to null
+          testCompany: null,
         ));
       } else {
         emit(state.copyWith(companies: updatedCompanies));
@@ -94,15 +91,54 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     )));
   }
 
-  void updateUrls(
-      {String? crmUrl, String? tradingUrl, String? integrationUrl}) {
+  // UPDATED: New comprehensive URL update method
+  void updateUrls({
+    String? webURL,
+    bool? webURLEnabled,
+    String? apiURL,
+    bool? apiURLEnabled,
+    String? crmurl,
+    bool? crmurlEnabled,
+    String? procurementURL,
+    bool? procurementURLEnabled,
+    String? reportsURL,
+    bool? reportsURLEnabled,
+    String? leasingURL,
+    bool? leasingURLEnabled,
+    String? tradingURL,
+    bool? tradingURLEnabled,
+    String? integrationURL,
+    bool? integrationURLEnabled,
+    String? fnbPosURL,
+    bool? fnbPosURLEnabled,
+    String? retailPOSUrl,
+    bool? retailPOSUrlEnabled,
+  }) {
     final currentUrls = state.urls;
     emit(state.copyWith(
-        urls: CompanyUrls(
-      crmurl: crmUrl ?? currentUrls.crmurl,
-      tradingURL: tradingUrl ?? currentUrls.tradingURL,
-      integrationURL: integrationUrl ?? currentUrls.integrationURL,
-    )));
+      urls: currentUrls.copyWith(
+        webURL: webURL,
+        webURLEnabled: webURLEnabled,
+        apiURL: apiURL,
+        apiURLEnabled: apiURLEnabled,
+        crmurl: crmurl,
+        crmurlEnabled: crmurlEnabled,
+        procurementURL: procurementURL,
+        procurementURLEnabled: procurementURLEnabled,
+        reportsURL: reportsURL,
+        reportsURLEnabled: reportsURLEnabled,
+        leasingURL: leasingURL,
+        leasingURLEnabled: leasingURLEnabled,
+        tradingURL: tradingURL,
+        tradingURLEnabled: tradingURLEnabled,
+        integrationURL: integrationURL,
+        integrationURLEnabled: integrationURLEnabled,
+        fnbPosURL: fnbPosURL,
+        fnbPosURLEnabled: fnbPosURLEnabled,
+        retailPOSUrl: retailPOSUrl,
+        retailPOSUrlEnabled: retailPOSUrlEnabled,
+      ),
+    ));
   }
 
   void toggleModule(int moduleId) {
@@ -120,7 +156,6 @@ class OnboardingCubit extends Cubit<OnboardingState> {
   Future<void> submitDeployment() async {
     emit(state.copyWith(deploymentStatus: DeploymentStatus.loading));
 
-    // Combine the main companies and the test company for the deployment request.
     final allCompanies = List<CompanyInfo>.from(state.companies);
     if (state.testCompany != null) {
       allCompanies.add(state.testCompany!);
@@ -129,7 +164,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     final request = ClientDeploymentRequest(
       clientName: state.clientName,
       databaseTypePrefix: state.databaseTypePrefix,
-      companies: allCompanies, // Send the combined list
+      companies: allCompanies,
       adminUser: state.adminUser,
       license: state.license,
       selectedModuleIds: state.selectedModuleIds,
@@ -143,7 +178,7 @@ class OnboardingCubit extends Cubit<OnboardingState> {
           ? DeploymentStatus.success
           : DeploymentStatus.failure,
       deploymentResult: result,
-      deploymentRequest: request, // ADDED: Store the deployment request
+      deploymentRequest: request,
       errorMessage: result.errorMessage,
     ));
   }

@@ -91,8 +91,7 @@ class ReportGenerator {
       padding: const pw.EdgeInsets.all(16),
       decoration: pw.BoxDecoration(
         border: pw.Border.all(color: PdfColors.grey300),
-        borderRadius: const pw.BorderRadius.all(
-            pw.Radius.circular(8)), // FIXED: Removed const
+        borderRadius: pw.BorderRadius.all(pw.Radius.circular(8)),
         color: result.isSuccess ? PdfColors.green50 : PdfColors.red50,
       ),
       child: pw.Column(
@@ -185,8 +184,7 @@ class ReportGenerator {
       padding: const pw.EdgeInsets.all(16),
       decoration: pw.BoxDecoration(
         border: pw.Border.all(color: PdfColors.orange300),
-        borderRadius: const pw.BorderRadius.all(
-            pw.Radius.circular(8)), // FIXED: Removed const
+        borderRadius: pw.BorderRadius.all(pw.Radius.circular(8)),
         color: PdfColors.orange50,
       ),
       child: pw.Column(
@@ -194,7 +192,7 @@ class ReportGenerator {
         children: [
           pw.Row(
             children: [
-              pw.Icon(const pw.IconData(0xe88f),
+              pw.Icon(pw.IconData(0xe88f),
                   size: 20, color: PdfColors.orange800),
               pw.SizedBox(width: 8),
               pw.Text(
@@ -227,6 +225,7 @@ class ReportGenerator {
     );
   }
 
+  // UPDATED: Enhanced deployment configuration with comprehensive URL details
   static pw.Widget _buildDeploymentConfiguration(
       ClientDeploymentRequest request) {
     return pw.Column(
@@ -252,31 +251,137 @@ class ReportGenerator {
         _buildInfoRow('  New Encryption:',
             request.license.usesNewEncryption ? 'Enabled' : 'Disabled'),
 
-        pw.SizedBox(height: 10),
+        pw.SizedBox(height: 15),
 
-        // System URLs
+        // UPDATED: Comprehensive System URLs Configuration
         pw.Text(
-          'System URLs:',
+          'System URLs Configuration:',
           style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
         ),
-        pw.SizedBox(height: 5),
-        _buildInfoRow(
-            '  CRM URL:',
-            request.urls.crmurl.isEmpty
-                ? 'Not configured'
-                : request.urls.crmurl),
-        _buildInfoRow(
-            '  Trading URL:',
-            request.urls.tradingURL.isEmpty
-                ? 'Not configured'
-                : request.urls.tradingURL),
-        _buildInfoRow(
-            '  Integration URL:',
-            request.urls.integrationURL.isEmpty
-                ? 'Not configured'
-                : request.urls.integrationURL),
+        pw.SizedBox(height: 8),
 
-        pw.SizedBox(height: 10),
+        // Create a table for better URL presentation
+        pw.TableHelper.fromTextArray(
+          headers: ['Service', 'Status', 'URL'],
+          data: [
+            [
+              'Web Portal',
+              request.urls.webURLEnabled ? '✓ Enabled' : '✗ Disabled',
+              request.urls.webURLEnabled
+                  ? request.urls.webURL
+                  : 'Not configured'
+            ],
+            [
+              'API Service',
+              request.urls.apiURLEnabled ? '✓ Enabled' : '✗ Disabled',
+              request.urls.apiURLEnabled
+                  ? request.urls.apiURL
+                  : 'Not configured'
+            ],
+            [
+              'CRM System',
+              request.urls.crmurlEnabled ? '✓ Enabled' : '✗ Disabled',
+              request.urls.crmurlEnabled
+                  ? request.urls.crmurl
+                  : 'Not configured'
+            ],
+            [
+              'Procurement',
+              request.urls.procurementURLEnabled ? '✓ Enabled' : '✗ Disabled',
+              request.urls.procurementURLEnabled
+                  ? request.urls.procurementURL
+                  : 'Not configured'
+            ],
+            [
+              'Reports',
+              request.urls.reportsURLEnabled ? '✓ Enabled' : '✗ Disabled',
+              request.urls.reportsURLEnabled
+                  ? request.urls.reportsURL
+                  : 'Not configured'
+            ],
+            [
+              'Leasing',
+              request.urls.leasingURLEnabled ? '✓ Enabled' : '✗ Disabled',
+              request.urls.leasingURLEnabled
+                  ? request.urls.leasingURL
+                  : 'Not configured'
+            ],
+            [
+              'Trading',
+              request.urls.tradingURLEnabled ? '✓ Enabled' : '✗ Disabled',
+              request.urls.tradingURLEnabled
+                  ? request.urls.tradingURL
+                  : 'Not configured'
+            ],
+            [
+              'Integration',
+              request.urls.integrationURLEnabled ? '✓ Enabled' : '✗ Disabled',
+              request.urls.integrationURLEnabled
+                  ? request.urls.integrationURL
+                  : 'Not configured'
+            ],
+            [
+              'F&B POS',
+              request.urls.fnbPosURLEnabled ? '✓ Enabled' : '✗ Disabled',
+              request.urls.fnbPosURLEnabled
+                  ? request.urls.fnbPosURL
+                  : 'Not configured'
+            ],
+            [
+              'Retail POS',
+              request.urls.retailPOSUrlEnabled ? '✓ Enabled' : '✗ Disabled',
+              request.urls.retailPOSUrlEnabled
+                  ? request.urls.retailPOSUrl
+                  : 'Not configured'
+            ],
+          ],
+          border: pw.TableBorder.all(color: PdfColors.grey300),
+          headerStyle:
+              pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10),
+          cellStyle: const pw.TextStyle(fontSize: 9),
+          cellAlignment: pw.Alignment.centerLeft,
+          cellPadding: const pw.EdgeInsets.all(4),
+          columnWidths: {
+            0: const pw.FixedColumnWidth(80), // Service name
+            1: const pw.FixedColumnWidth(60), // Status
+            2: const pw.FlexColumnWidth(), // URL (flexible)
+          },
+        ),
+
+        pw.SizedBox(height: 15),
+
+        // Summary of enabled URLs
+        pw.Text(
+          'URL Configuration Summary:',
+          style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+        ),
+        pw.SizedBox(height: 5),
+
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Text('Total URLs configured:'),
+            pw.Text('${_getEnabledUrlCount(request.urls)}'),
+          ],
+        ),
+
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Text('URLs enabled:'),
+            pw.Text('${_getEnabledUrlCount(request.urls)}'),
+          ],
+        ),
+
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Text('URLs disabled:'),
+            pw.Text('${10 - _getEnabledUrlCount(request.urls)}'),
+          ],
+        ),
+
+        pw.SizedBox(height: 15),
 
         // Selected Modules
         pw.Text(
@@ -295,8 +400,7 @@ class ReportGenerator {
                   const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: pw.BoxDecoration(
                 color: PdfColors.blue100,
-                borderRadius: const pw.BorderRadius.all(
-                    pw.Radius.circular(4)), // FIXED: Removed const
+                borderRadius: pw.BorderRadius.all(pw.Radius.circular(4)),
                 border: pw.Border.all(color: PdfColors.blue300),
               ),
               child: pw.Text(
@@ -309,6 +413,22 @@ class ReportGenerator {
         ),
       ],
     );
+  }
+
+  // Helper method to count enabled URLs
+  static int _getEnabledUrlCount(CompanyUrls urls) {
+    int count = 0;
+    if (urls.webURLEnabled) count++;
+    if (urls.apiURLEnabled) count++;
+    if (urls.crmurlEnabled) count++;
+    if (urls.procurementURLEnabled) count++;
+    if (urls.reportsURLEnabled) count++;
+    if (urls.leasingURLEnabled) count++;
+    if (urls.tradingURLEnabled) count++;
+    if (urls.integrationURLEnabled) count++;
+    if (urls.fnbPosURLEnabled) count++;
+    if (urls.retailPOSUrlEnabled) count++;
+    return count;
   }
 
   static pw.Widget _buildDatabasesSection(DeploymentResult result) {
@@ -357,8 +477,7 @@ class ReportGenerator {
           padding: const pw.EdgeInsets.all(10),
           decoration: pw.BoxDecoration(
             border: pw.Border.all(color: PdfColors.red),
-            borderRadius: const pw.BorderRadius.all(
-                pw.Radius.circular(5)), // FIXED: Removed const
+            borderRadius: pw.BorderRadius.all(pw.Radius.circular(5)),
             color: PdfColors.red50,
           ),
           child: pw.Text(

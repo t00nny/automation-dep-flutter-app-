@@ -105,6 +105,103 @@ class _ClientDetailsPageState extends State<ClientDetailsPage> {
                     }
                   },
                 ),
+                const SizedBox(height: 24),
+
+                // Client Logo Section
+                Text(
+                  'Client Logo',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    children: [
+                      if (state.clientLogoFile != null) ...[
+                        // Display selected logo
+                        Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey.shade300),
+                            image: DecorationImage(
+                              image: FileImage(state.clientLogoFile!),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextButton.icon(
+                              onPressed: () => context
+                                  .read<OnboardingCubit>()
+                                  .pickClientLogo(),
+                              icon: const Icon(Icons.upload_file),
+                              label: const Text('Change Logo'),
+                            ),
+                            const SizedBox(width: 8),
+                            TextButton.icon(
+                              onPressed: () => context
+                                  .read<OnboardingCubit>()
+                                  .removeClientLogo(),
+                              icon: const Icon(Icons.delete_outline),
+                              label: const Text('Remove'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.red.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ] else ...[
+                        // Upload button
+                        Icon(
+                          Icons.cloud_upload_outlined,
+                          size: 48,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Upload a logo for this client',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Recommended: JPG, JPEG, or PNG (max 1024x1024)',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: () =>
+                              context.read<OnboardingCubit>().pickClientLogo(),
+                          icon: const Icon(Icons.upload_file),
+                          label: const Text('Upload Logo'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).primaryColor.withOpacity(0.1),
+                            foregroundColor: Theme.of(context).primaryColor,
+                            elevation: 0,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 16),
 
                 // Database validation loading indicator

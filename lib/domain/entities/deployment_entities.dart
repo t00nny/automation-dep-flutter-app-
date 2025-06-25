@@ -161,6 +161,7 @@ class CompanyUrls extends Equatable {
   final bool fnbPosURLEnabled;
   final String retailPOSUrl;
   final bool retailPOSUrlEnabled;
+  final String logoUrl;
 
   const CompanyUrls({
     this.webURL = 'https://web.pro360erp.com',
@@ -183,8 +184,8 @@ class CompanyUrls extends Equatable {
     this.fnbPosURLEnabled = true,
     this.retailPOSUrl = 'https://retail.apps.pro360erp.com',
     this.retailPOSUrlEnabled = true,
+    this.logoUrl = '',
   });
-
   CompanyUrls copyWith({
     String? webURL,
     bool? webURLEnabled,
@@ -206,6 +207,7 @@ class CompanyUrls extends Equatable {
     bool? fnbPosURLEnabled,
     String? retailPOSUrl,
     bool? retailPOSUrlEnabled,
+    String? logoUrl,
   }) {
     return CompanyUrls(
       webURL: webURL ?? this.webURL,
@@ -230,6 +232,7 @@ class CompanyUrls extends Equatable {
       fnbPosURLEnabled: fnbPosURLEnabled ?? this.fnbPosURLEnabled,
       retailPOSUrl: retailPOSUrl ?? this.retailPOSUrl,
       retailPOSUrlEnabled: retailPOSUrlEnabled ?? this.retailPOSUrlEnabled,
+      logoUrl: logoUrl ?? this.logoUrl,
     );
   }
 
@@ -244,8 +247,8 @@ class CompanyUrls extends Equatable {
         'integrationURL': integrationURLEnabled ? integrationURL : '',
         'fnbPosURL': fnbPosURLEnabled ? fnbPosURL : '',
         'retailPOSUrl': retailPOSUrlEnabled ? retailPOSUrl : '',
+        'logoUrl': logoUrl,
       };
-
   @override
   List<Object?> get props => [
         webURL,
@@ -268,6 +271,7 @@ class CompanyUrls extends Equatable {
         fnbPosURLEnabled,
         retailPOSUrl,
         retailPOSUrlEnabled,
+        logoUrl,
       ];
 }
 

@@ -1,20 +1,27 @@
+import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:client_deployment_app/domain/entities/deployment_entities.dart';
 import 'package:client_deployment_app/domain/usecases/deploy_client.dart';
 import 'package:client_deployment_app/domain/usecases/check_database_exists.dart';
+import 'package:client_deployment_app/domain/usecases/upload_logo.dart';
 
 part 'onboarding_state.dart';
 
 class OnboardingCubit extends Cubit<OnboardingState> {
   final DeployClient _deployClient;
   final CheckDatabaseExists _checkDatabaseExists;
+  final UploadLogo _uploadLogo;
+  final ImagePicker _imagePicker = ImagePicker();
 
   OnboardingCubit({
     required DeployClient deployClient,
     required CheckDatabaseExists checkDatabaseExists,
+    required UploadLogo uploadLogo,
   })  : _deployClient = deployClient,
         _checkDatabaseExists = checkDatabaseExists,
+        _uploadLogo = uploadLogo,
         super(OnboardingState.initial());
 
   void startNewSession() {
@@ -194,6 +201,29 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     }
   }
 
+  // Logo handling methods
+  Future<void> pickClientLogo() async {
+    try {
+      final XFile? pickedFile = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+        maxWidth: 1024,
+        maxHeight: 1024,
+      );
+
+      if (pickedFile != null) {
+        final file = File(pickedFile.path);
+        emit(state.copyWith(clientLogoFile: file));
+      }
+    } catch (e) {
+      // Handle error if needed
+    }
+  }
+
+  void removeClientLogo() {
+    emit(state.copyWith(clearClientLogo: true));
+  }
+
   void clearDatabaseValidationError() {
     emit(state.copyWith(clearDatabaseError: true));
   }
@@ -201,30 +231,56 @@ class OnboardingCubit extends Cubit<OnboardingState> {
   Future<void> submitDeployment() async {
     emit(state.copyWith(deploymentStatus: DeploymentStatus.loading));
 
-    final allCompanies = List<CompanyInfo>.from(state.companies);
-    if (state.testCompany != null) {
-      allCompanies.add(state.testCompany!);
+    try {
+      // Step 1: Upload logo if exists
+      String? logoUrl;
+      if (state.clientLogoFile != null) {
+        logoUrl = await _uploadLogo(state.clientLogoFile!);
+        if (logoUrl == null) {
+          emit(state.copyWith(
+            deploymentStatus: DeploymentStatus.failure,
+            errorMessage: 'Failed to upload logo. Please try again.',
+          ));
+          return;
+        }
+      }
+
+      // Step 2: Prepare deployment request with logo URL
+      final allCompanies = List<CompanyInfo>.from(state.companies);
+      if (state.testCompany != null) {
+        allCompanies.add(state.testCompany!);
+      }
+
+      // Update URLs with logo URL if uploaded
+      final updatedUrls =
+          logoUrl != null ? state.urls.copyWith(logoUrl: logoUrl) : state.urls;
+
+      final request = ClientDeploymentRequest(
+        clientName: state.clientName,
+        databaseTypePrefix: state.databaseTypePrefix,
+        companies: allCompanies,
+        adminUser: state.adminUser,
+        license: state.license,
+        selectedModuleIds: state.selectedModuleIds,
+        urls: updatedUrls,
+      );
+
+      // Step 3: Deploy client
+      final result = await _deployClient(request);
+
+      emit(state.copyWith(
+        deploymentStatus: result.isSuccess
+            ? DeploymentStatus.success
+            : DeploymentStatus.failure,
+        deploymentResult: result,
+        deploymentRequest: request,
+        errorMessage: result.errorMessage,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        deploymentStatus: DeploymentStatus.failure,
+        errorMessage: 'An unexpected error occurred: ${e.toString()}',
+      ));
     }
-
-    final request = ClientDeploymentRequest(
-      clientName: state.clientName,
-      databaseTypePrefix: state.databaseTypePrefix,
-      companies: allCompanies,
-      adminUser: state.adminUser,
-      license: state.license,
-      selectedModuleIds: state.selectedModuleIds,
-      urls: state.urls,
-    );
-
-    final result = await _deployClient(request);
-
-    emit(state.copyWith(
-      deploymentStatus: result.isSuccess
-          ? DeploymentStatus.success
-          : DeploymentStatus.failure,
-      deploymentResult: result,
-      deploymentRequest: request,
-      errorMessage: result.errorMessage,
-    ));
   }
 }

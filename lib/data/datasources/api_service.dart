@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:client_deployment_app/domain/entities/deployment_entities.dart';
 import 'package:dio/dio.dart';
 
@@ -20,5 +21,28 @@ class ApiService {
       queryParameters: {'clientName': clientName},
     );
     return response.data as bool;
+  }
+
+  Future<String?> uploadLogo(File logoFile) async {
+    try {
+      const endpoint = 'api/LogoUpload/upload';
+
+      // Create form data for file upload
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          logoFile.path,
+          filename: logoFile.path.split('/').last,
+        ),
+      });
+
+      final response = await dio.post(endpoint, data: formData);
+
+      if (response.statusCode == 200 && response.data is Map) {
+        return response.data['url'] as String?;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 }

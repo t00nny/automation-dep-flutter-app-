@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:client_deployment_app/data/datasources/api_service.dart';
 import 'package:client_deployment_app/domain/entities/deployment_entities.dart';
 import 'package:client_deployment_app/domain/repositories/deployment_repository.dart';
@@ -42,6 +43,15 @@ class DeploymentRepositoryImpl implements DeploymentRepository {
       }
       // For other errors, rethrow
       rethrow;
+    }
+  }
+
+  @override
+  Future<String?> uploadLogo(File logoFile) async {
+    try {
+      return await apiService.uploadLogo(logoFile);
+    } catch (e) {
+      return null;
     }
   }
 }

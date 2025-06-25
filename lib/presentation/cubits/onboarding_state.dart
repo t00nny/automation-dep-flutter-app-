@@ -16,6 +16,9 @@ class OnboardingState extends Equatable {
   final List<int> selectedModuleIds;
   final CompanyUrls urls;
 
+  // Logo upload state
+  final File? clientLogoFile;
+
   // UI-specific state
   final DeploymentStatus deploymentStatus;
   final DeploymentResult? deploymentResult;
@@ -26,7 +29,6 @@ class OnboardingState extends Equatable {
   // Database validation state
   final bool isCheckingDatabase;
   final String? databaseValidationError;
-
   const OnboardingState({
     required this.clientName,
     required this.databaseTypePrefix,
@@ -36,6 +38,7 @@ class OnboardingState extends Equatable {
     required this.license,
     required this.selectedModuleIds,
     required this.urls,
+    this.clientLogoFile,
     this.deploymentStatus = DeploymentStatus.initial,
     this.deploymentResult,
     this.deploymentRequest, // ADDED
@@ -58,7 +61,9 @@ class OnboardingState extends Equatable {
       urls: const CompanyUrls(),
       deploymentRequest: null, // ADDED
     );
-  } // Helper method to create a copy of the state with updated values.
+  }
+
+  // Helper method to create a copy of the state with updated values.
   OnboardingState copyWith({
     String? clientName,
     String? databaseTypePrefix,
@@ -68,6 +73,7 @@ class OnboardingState extends Equatable {
     LicenseInfo? license,
     List<int>? selectedModuleIds,
     CompanyUrls? urls,
+    File? clientLogoFile,
     DeploymentStatus? deploymentStatus,
     DeploymentResult? deploymentResult,
     ClientDeploymentRequest? deploymentRequest, // ADDED
@@ -75,6 +81,7 @@ class OnboardingState extends Equatable {
     bool? isCheckingDatabase,
     String? databaseValidationError,
     bool clearDatabaseError = false, // Add a flag to explicitly clear the error
+    bool clearClientLogo = false, // Add a flag to clear the logo
   }) {
     return OnboardingState(
       clientName: clientName ?? this.clientName,
@@ -85,6 +92,8 @@ class OnboardingState extends Equatable {
       license: license ?? this.license,
       selectedModuleIds: selectedModuleIds ?? this.selectedModuleIds,
       urls: urls ?? this.urls,
+      clientLogoFile:
+          clearClientLogo ? null : (clientLogoFile ?? this.clientLogoFile),
       deploymentStatus: deploymentStatus ?? this.deploymentStatus,
       deploymentResult: deploymentResult ?? this.deploymentResult,
       deploymentRequest: deploymentRequest ?? this.deploymentRequest, // ADDED
@@ -106,6 +115,7 @@ class OnboardingState extends Equatable {
         license,
         selectedModuleIds,
         urls,
+        clientLogoFile,
         deploymentStatus,
         deploymentResult,
         deploymentRequest, // ADDED

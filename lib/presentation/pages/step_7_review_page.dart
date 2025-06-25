@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -99,9 +100,7 @@ class ReviewPage extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 24),
-
-                // Client Information
+                const SizedBox(height: 24), // Client Information
                 _buildSectionCard(
                   context,
                   'Client Information',
@@ -111,6 +110,41 @@ class ReviewPage extends StatelessWidget {
                   [
                     _buildInfoRow('Client Name', state.clientName),
                     _buildInfoRow('Database Prefix', state.databaseTypePrefix),
+                    if (state.clientLogoFile != null) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          const Text(
+                            'Client Logo:',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(width: 12),
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey.shade300),
+                              image: DecorationImage(
+                                image: FileImage(state.clientLogoFile!),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: Text(
+                              'Logo will be uploaded during deployment',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
 

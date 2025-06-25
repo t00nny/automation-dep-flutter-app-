@@ -15,13 +15,33 @@ class DeploymentRepositoryImpl implements DeploymentRepository {
     } on DioException catch (e) {
       return DeploymentResult(
         isSuccess: false,
-        errorMessage: e.response?.data?['errorMessage'] ?? 'A network error occurred: ${e.message}',
+        errorMessage: e.response?.data?['errorMessage'] ??
+            'A network error occurred: ${e.message}',
       );
     } catch (e) {
       return DeploymentResult(
         isSuccess: false,
         errorMessage: 'An unexpected error occurred: ${e.toString()}',
       );
+    }
+  }
+
+  @override
+  Future<bool> checkDatabaseExists(
+      String databaseTypePrefix, String clientName) async {
+    try {
+      return await apiService.checkDatabaseExists(
+          databaseTypePrefix, clientName);
+    } on DioException catch (e) {
+      // If we get a 400 or 500 error, we throw the exception to handle it in the UI
+      if (e.response?.statusCode == 400) {
+        throw Exception('Database type prefix cannot be empty.');
+      } else if (e.response?.statusCode == 500) {
+        throw Exception(
+            'An internal error occurred while checking the database.');
+      }
+      // For other errors, rethrow
+      rethrow;
     }
   }
 }

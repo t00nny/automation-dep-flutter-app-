@@ -23,6 +23,10 @@ class OnboardingState extends Equatable {
       deploymentRequest; // ADDED: Store the deployment request
   final String? errorMessage;
 
+  // Database validation state
+  final bool isCheckingDatabase;
+  final String? databaseValidationError;
+
   const OnboardingState({
     required this.clientName,
     required this.databaseTypePrefix,
@@ -36,6 +40,8 @@ class OnboardingState extends Equatable {
     this.deploymentResult,
     this.deploymentRequest, // ADDED
     this.errorMessage,
+    this.isCheckingDatabase = false,
+    this.databaseValidationError,
   });
 
   // Factory constructor for the initial state of the wizard.
@@ -52,9 +58,7 @@ class OnboardingState extends Equatable {
       urls: const CompanyUrls(),
       deploymentRequest: null, // ADDED
     );
-  }
-
-  // Helper method to create a copy of the state with updated values.
+  } // Helper method to create a copy of the state with updated values.
   OnboardingState copyWith({
     String? clientName,
     String? databaseTypePrefix,
@@ -68,6 +72,9 @@ class OnboardingState extends Equatable {
     DeploymentResult? deploymentResult,
     ClientDeploymentRequest? deploymentRequest, // ADDED
     String? errorMessage,
+    bool? isCheckingDatabase,
+    String? databaseValidationError,
+    bool clearDatabaseError = false, // Add a flag to explicitly clear the error
   }) {
     return OnboardingState(
       clientName: clientName ?? this.clientName,
@@ -82,6 +89,10 @@ class OnboardingState extends Equatable {
       deploymentResult: deploymentResult ?? this.deploymentResult,
       deploymentRequest: deploymentRequest ?? this.deploymentRequest, // ADDED
       errorMessage: errorMessage ?? this.errorMessage,
+      isCheckingDatabase: isCheckingDatabase ?? this.isCheckingDatabase,
+      databaseValidationError: clearDatabaseError
+          ? null
+          : (databaseValidationError ?? this.databaseValidationError),
     );
   }
 
@@ -99,5 +110,7 @@ class OnboardingState extends Equatable {
         deploymentResult,
         deploymentRequest, // ADDED
         errorMessage,
+        isCheckingDatabase,
+        databaseValidationError,
       ];
 }

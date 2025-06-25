@@ -11,4 +11,14 @@ class ApiService {
     final response = await dio.post(endpoint, data: request.toJson());
     return DeploymentResult.fromJson(response.data);
   }
+
+  Future<bool> checkDatabaseExists(
+      String databaseTypePrefix, String clientName) async {
+    final endpoint = 'api/ClientDeployment/check-database/$databaseTypePrefix';
+    final response = await dio.get(
+      endpoint,
+      queryParameters: {'clientName': clientName},
+    );
+    return response.data as bool;
+  }
 }

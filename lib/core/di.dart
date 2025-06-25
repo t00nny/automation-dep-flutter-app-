@@ -4,6 +4,7 @@ import 'package:client_deployment_app/data/datasources/api_service.dart';
 import 'package:client_deployment_app/data/repositories/deployment_repository_impl.dart';
 import 'package:client_deployment_app/domain/repositories/deployment_repository.dart';
 import 'package:client_deployment_app/domain/usecases/deploy_client.dart';
+import 'package:client_deployment_app/domain/usecases/check_database_exists.dart';
 import 'package:client_deployment_app/presentation/cubits/onboarding_cubit.dart';
 import 'package:flutter/foundation.dart';
 // --- START OF FIX ---
@@ -16,10 +17,14 @@ final sl = GetIt.instance;
 
 Future<void> setup() async {
   // Cubits
-  sl.registerFactory(() => OnboardingCubit(deployClient: sl()));
+  sl.registerFactory(() => OnboardingCubit(
+        deployClient: sl(),
+        checkDatabaseExists: sl(),
+      ));
 
   // Use Cases
   sl.registerLazySingleton(() => DeployClient(repository: sl()));
+  sl.registerLazySingleton(() => CheckDatabaseExists(repository: sl()));
 
   // Repositories
   sl.registerLazySingleton<DeploymentRepository>(

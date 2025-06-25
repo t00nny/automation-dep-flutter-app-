@@ -2,14 +2,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:client_deployment_app/domain/entities/deployment_entities.dart';
 import 'package:client_deployment_app/domain/usecases/deploy_client.dart';
+import 'package:client_deployment_app/domain/usecases/check_database_exists.dart';
 
 part 'onboarding_state.dart';
 
 class OnboardingCubit extends Cubit<OnboardingState> {
   final DeployClient _deployClient;
+  final CheckDatabaseExists _checkDatabaseExists;
 
-  OnboardingCubit({required DeployClient deployClient})
-      : _deployClient = deployClient,
+  OnboardingCubit({
+    required DeployClient deployClient,
+    required CheckDatabaseExists checkDatabaseExists,
+  })  : _deployClient = deployClient,
+        _checkDatabaseExists = checkDatabaseExists,
         super(OnboardingState.initial());
 
   void startNewSession() {
@@ -151,6 +156,46 @@ class OnboardingCubit extends Cubit<OnboardingState> {
       updatedModules.add(moduleId);
     }
     emit(state.copyWith(selectedModuleIds: updatedModules));
+  }
+
+  Future<void> validateClientDatabase() async {
+    if (state.clientName.trim().isEmpty || state.databaseTypePrefix.isEmpty) {
+      return;
+    }
+
+    emit(state.copyWith(
+      isCheckingDatabase: true,
+      clearDatabaseError: true, // Clear any previous error
+    ));
+
+    try {
+      final databaseExists = await _checkDatabaseExists(
+        state.databaseTypePrefix,
+        state.clientName.trim(),
+      );
+
+      if (databaseExists) {
+        emit(state.copyWith(
+          isCheckingDatabase: false,
+          databaseValidationError:
+              'Invalid: This client name already has a database.',
+        ));
+      } else {
+        emit(state.copyWith(
+          isCheckingDatabase: false,
+          clearDatabaseError: true, // Explicitly clear error on success
+        ));
+      }
+    } catch (e) {
+      emit(state.copyWith(
+        isCheckingDatabase: false,
+        databaseValidationError: 'Error checking database: ${e.toString()}',
+      ));
+    }
+  }
+
+  void clearDatabaseValidationError() {
+    emit(state.copyWith(clearDatabaseError: true));
   }
 
   Future<void> submitDeployment() async {

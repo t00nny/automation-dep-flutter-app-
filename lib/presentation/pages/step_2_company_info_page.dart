@@ -122,9 +122,35 @@ class CompanyInfoTile extends StatelessWidget {
       child: ListTile(
         title: Text(company.companyName,
             style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(company.city.isNotEmpty && company.country.isNotEmpty
-            ? '${company.city}, ${company.country}'
-            : 'No location details'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(company.city.isNotEmpty && company.country.isNotEmpty
+                ? '${company.city}, ${company.country}'
+                : 'No location details'),
+            if (company.logoText.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(Icons.text_fields,
+                      size: 14, color: Colors.grey.shade600),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      'Logo: ${company.logoText}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
         trailing: isTestCompany
             ? Icon(Icons.science_outlined, color: theme.colorScheme.secondary)
             : Row(

@@ -172,6 +172,11 @@ class ReportGenerator {
                       padding: const pw.EdgeInsets.only(left: 10),
                       child: pw.Text('Phone: ${company.phoneNumber}'),
                     ),
+                  if (company.logoText.isNotEmpty)
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.only(left: 10),
+                      child: pw.Text('Logo Text: ${company.logoText}'),
+                    ),
                 ],
               ),
             )),

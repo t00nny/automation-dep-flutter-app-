@@ -41,8 +41,10 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     updatedCompanies.add(company);
 
     if (state.companies.isEmpty) {
-      final testCompany =
-          company.copyWith(companyName: 'Test ${state.clientName}');
+      final testCompany = company.copyWith(
+        companyName: 'Test ${state.clientName}',
+        logoText: company.logoText, // Explicitly copy logoText to test company
+      );
       emit(state.copyWith(
         companies: updatedCompanies,
         testCompany: testCompany,
@@ -56,7 +58,19 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     final List<CompanyInfo> updatedCompanies = List.from(state.companies);
     if (index < updatedCompanies.length) {
       updatedCompanies[index] = company;
-      emit(state.copyWith(companies: updatedCompanies));
+
+      // If this is the first company and we have a test company, update test company's logoText
+      CompanyInfo? updatedTestCompany = state.testCompany;
+      if (index == 0 && state.testCompany != null) {
+        updatedTestCompany = state.testCompany!.copyWith(
+          logoText: company.logoText,
+        );
+      }
+
+      emit(state.copyWith(
+        companies: updatedCompanies,
+        testCompany: updatedTestCompany,
+      ));
     }
   }
 

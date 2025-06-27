@@ -49,6 +49,7 @@ class CompanyInfo extends Equatable {
   final String country;
   final String phoneNumber;
   final String logoUrl;
+  final String logoText;
 
   const CompanyInfo({
     this.companyName = '',
@@ -58,7 +59,15 @@ class CompanyInfo extends Equatable {
     this.country = '',
     this.phoneNumber = '',
     this.logoUrl = '',
+    this.logoText = '',
   });
+
+  // Factory constructor to create CompanyInfo with default logoText as client name
+  factory CompanyInfo.withDefaultLogoText(String clientName) {
+    return CompanyInfo(
+      logoText: clientName,
+    );
+  }
 
   CompanyInfo copyWith({
     String? companyName,
@@ -67,6 +76,8 @@ class CompanyInfo extends Equatable {
     String? city,
     String? country,
     String? phoneNumber,
+    String? logoUrl,
+    String? logoText,
   }) {
     return CompanyInfo(
       companyName: companyName ?? this.companyName,
@@ -75,7 +86,8 @@ class CompanyInfo extends Equatable {
       city: city ?? this.city,
       country: country ?? this.country,
       phoneNumber: phoneNumber ?? this.phoneNumber,
-      logoUrl: logoUrl,
+      logoUrl: logoUrl ?? this.logoUrl,
+      logoText: logoText ?? this.logoText,
     );
   }
 
@@ -87,11 +99,20 @@ class CompanyInfo extends Equatable {
         'country': country,
         'phoneNumber': phoneNumber,
         'logoUrl': logoUrl,
+        'logoText': logoText,
       };
 
   @override
-  List<Object?> get props =>
-      [companyName, address1, address2, city, country, phoneNumber, logoUrl];
+  List<Object?> get props => [
+        companyName,
+        address1,
+        address2,
+        city,
+        country,
+        phoneNumber,
+        logoUrl,
+        logoText
+      ];
 }
 
 class AdminUserInfo extends Equatable {

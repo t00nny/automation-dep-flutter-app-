@@ -188,6 +188,27 @@ class ReviewPage extends StatelessWidget {
                                   fontSize: 12,
                                 ),
                               ),
+                            if (company.logoText.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(Icons.text_fields,
+                                      size: 12, color: Colors.blue.shade600),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      'Logo Text: ${company.logoText}',
+                                      style: TextStyle(
+                                        color: Colors.blue.shade600,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ],
                         ),
                       );
@@ -219,6 +240,27 @@ class ReviewPage extends StatelessWidget {
                                 fontStyle: FontStyle.italic,
                               ),
                             ),
+                            if (state.testCompany!.logoText.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(Icons.text_fields,
+                                      size: 12, color: Colors.green.shade600),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      'Logo Text: ${state.testCompany!.logoText}',
+                                      style: TextStyle(
+                                        color: Colors.green.shade600,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ],
                         ),
                       ),

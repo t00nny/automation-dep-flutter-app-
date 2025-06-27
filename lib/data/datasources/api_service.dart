@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:client_deployment_app/domain/entities/deployment_entities.dart';
+import 'package:client_deployment_app/domain/entities/company_entities.dart';
 import 'package:dio/dio.dart';
 
 class ApiService {
@@ -44,5 +45,34 @@ class ApiService {
     } catch (e) {
       return null;
     }
+  }
+
+  // Company Management APIs
+  Future<List<ExistingCompany>> getAllCompanies() async {
+    const endpoint = 'api/Companies';
+    final response = await dio.get(endpoint);
+
+    if (response.data is List) {
+      return (response.data as List)
+          .map((json) => ExistingCompany.fromJson(json))
+          .toList();
+    }
+    return [];
+  }
+
+  Future<ExistingCompany> getCompanyById(int id) async {
+    final endpoint = 'api/Companies/$id';
+    final response = await dio.get(endpoint);
+    return ExistingCompany.fromJson(response.data);
+  }
+
+  Future<void> updateCompany(int id, CompanyUpdateRequest request) async {
+    final endpoint = 'api/Companies/$id';
+    await dio.put(endpoint, data: request.toJson());
+  }
+
+  Future<void> bulkUpdateCompanies(BulkUpdateRequest request) async {
+    const endpoint = 'api/Companies/bulk-update';
+    await dio.put(endpoint, data: request.toJson());
   }
 }

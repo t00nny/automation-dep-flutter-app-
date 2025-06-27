@@ -11,6 +11,8 @@ import 'package:client_deployment_app/presentation/pages/step_6_modules_page.dar
 import 'package:client_deployment_app/presentation/pages/step_7_review_page.dart';
 // import 'package:client_deployment_app/presentation/pages/deployment_progress_page.dart'; // REMOVED
 import 'package:client_deployment_app/presentation/pages/deployment_result_page.dart';
+import 'package:client_deployment_app/presentation/pages/companies_list_page.dart';
+import 'package:client_deployment_app/presentation/pages/company_details_page.dart';
 
 class AppRouter {
   static final router = GoRouter(
@@ -42,6 +44,18 @@ class AppRouter {
       GoRoute(
           path: '/result',
           builder: (context, state) => const DeploymentResultPage()),
+
+      // Company Management Routes
+      GoRoute(
+          path: '/companies',
+          builder: (context, state) => const CompaniesListPage()),
+      GoRoute(
+        path: '/company-details/:id',
+        builder: (context, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return CompanyDetailsPage(companyId: id);
+        },
+      ),
     ],
   );
 }

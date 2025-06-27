@@ -2,11 +2,18 @@ import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
 import 'package:client_deployment_app/data/datasources/api_service.dart';
 import 'package:client_deployment_app/data/repositories/deployment_repository_impl.dart';
+import 'package:client_deployment_app/data/repositories/company_repository_impl.dart';
 import 'package:client_deployment_app/domain/repositories/deployment_repository.dart';
+import 'package:client_deployment_app/domain/repositories/company_repository.dart';
 import 'package:client_deployment_app/domain/usecases/deploy_client.dart';
 import 'package:client_deployment_app/domain/usecases/check_database_exists.dart';
 import 'package:client_deployment_app/domain/usecases/upload_logo.dart';
+import 'package:client_deployment_app/domain/usecases/get_all_companies.dart';
+import 'package:client_deployment_app/domain/usecases/get_company_by_id.dart';
+import 'package:client_deployment_app/domain/usecases/update_company.dart';
+import 'package:client_deployment_app/domain/usecases/bulk_update_companies.dart';
 import 'package:client_deployment_app/presentation/cubits/onboarding_cubit.dart';
+import 'package:client_deployment_app/presentation/cubits/company_management_cubit.dart';
 import 'package:flutter/foundation.dart';
 // --- START OF FIX ---
 // Added the necessary imports for HttpClient, X509Certificate, and IOHttpClientAdapter
@@ -24,14 +31,30 @@ Future<void> setup() async {
         uploadLogo: sl(),
       ));
 
-  // Use Cases
+  sl.registerFactory(() => CompanyManagementCubit(
+        getAllCompanies: sl(),
+        getCompanyById: sl(),
+        updateCompany: sl(),
+        bulkUpdateCompanies: sl(),
+      ));
+
+  // Use Cases - Deployment
   sl.registerLazySingleton(() => DeployClient(repository: sl()));
   sl.registerLazySingleton(() => CheckDatabaseExists(repository: sl()));
   sl.registerLazySingleton(() => UploadLogo(repository: sl()));
 
+  // Use Cases - Company Management
+  sl.registerLazySingleton(() => GetAllCompanies(repository: sl()));
+  sl.registerLazySingleton(() => GetCompanyById(repository: sl()));
+  sl.registerLazySingleton(() => UpdateCompany(repository: sl()));
+  sl.registerLazySingleton(() => BulkUpdateCompanies(repository: sl()));
+
   // Repositories
   sl.registerLazySingleton<DeploymentRepository>(
     () => DeploymentRepositoryImpl(apiService: sl()),
+  );
+  sl.registerLazySingleton<CompanyRepository>(
+    () => CompanyRepositoryImpl(apiService: sl()),
   );
 
   // Services

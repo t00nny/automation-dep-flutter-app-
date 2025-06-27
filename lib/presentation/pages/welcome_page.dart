@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:client_deployment_app/presentation/cubits/onboarding_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
 
@@ -17,7 +16,8 @@ class WelcomePage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Icon(Icons.rocket_launch_rounded, size: 100, color: Color(0xFF1976D2)),
+              const Icon(Icons.rocket_launch_rounded,
+                  size: 100, color: Color(0xFF1976D2)),
               const SizedBox(height: 24),
               Text(
                 'Automated Client Onboarding',
@@ -31,16 +31,39 @@ class WelcomePage extends StatelessWidget {
                 'This wizard will guide you through the process of setting up and deploying a new client environment.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.black54,
-                ),
+                      color: Colors.black54,
+                    ),
               ),
               const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: () {
-                  context.read<OnboardingCubit>().startNewSession();
-                  context.push('/step1');
-                },
-                child: const Text('Start New Onboarding'),
+              Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        context.read<OnboardingCubit>().startNewSession();
+                        context.push('/step1');
+                      },
+                      icon: const Icon(Icons.add_business),
+                      label: const Text('Start New Onboarding'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => context.push('/companies'),
+                      icon: const Icon(Icons.business),
+                      label: const Text('Manage Existing Companies'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

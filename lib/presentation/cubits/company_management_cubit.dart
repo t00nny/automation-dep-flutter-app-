@@ -32,8 +32,9 @@ class CompanyManagementCubit extends Cubit<CompanyManagementState> {
     try {
       final companies = await _getAllCompanies();
       print('DEBUG: Loaded ${companies.length} companies from API');
-      print('DEBUG: First few companies: ${companies.take(3).map((c) => '${c.id}: ${c.companyName}').toList()}');
-      
+      print(
+          'DEBUG: First few companies: ${companies.take(3).map((c) => '${c.id}: ${c.companyName}').toList()}');
+
       emit(state.copyWith(
         status: CompanyManagementStatus.success,
         companies: companies,
@@ -55,9 +56,11 @@ class CompanyManagementCubit extends Cubit<CompanyManagementState> {
 
     try {
       final company = await _getCompanyById(companyId);
-      print('DEBUG: Loaded company details: ${company.companyName} (${company.id})');
-      print('DEBUG: Company status: ${company.status}, Users: ${company.numberOfUsers}');
-      
+      print(
+          'DEBUG: Loaded company details: ${company.companyName} (${company.id})');
+      print(
+          'DEBUG: Company status: ${company.status}, Users: ${company.numberOfUsers}');
+
       emit(state.copyWith(
         detailsStatus: CompanyDetailsStatus.success,
         selectedCompanyDetails: company,
@@ -122,7 +125,7 @@ class CompanyManagementCubit extends Cubit<CompanyManagementState> {
       await _updateCompany(id, request);
       print('DEBUG: Single company update completed successfully');
       emit(state.copyWith(updateStatus: CompanyUpdateStatus.success));
-      
+
       // Reload companies to reflect changes
       print('DEBUG: Reloading companies after single update');
       await loadCompanies();
@@ -138,7 +141,8 @@ class CompanyManagementCubit extends Cubit<CompanyManagementState> {
 
   Future<void> bulkUpdate(BulkUpdateRequest request) async {
     emit(state.copyWith(updateStatus: CompanyUpdateStatus.loading));
-    print('DEBUG: Starting bulk update for ${request.companyIds.length} companies');
+    print(
+        'DEBUG: Starting bulk update for ${request.companyIds.length} companies');
 
     try {
       await _bulkUpdateCompanies(request);
@@ -147,7 +151,7 @@ class CompanyManagementCubit extends Cubit<CompanyManagementState> {
         updateStatus: CompanyUpdateStatus.success,
         selectedCompanies: const {},
       ));
-      
+
       // Reload companies to reflect changes
       print('DEBUG: Reloading companies after bulk update');
       await loadCompanies();

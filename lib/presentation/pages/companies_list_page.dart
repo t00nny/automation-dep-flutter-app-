@@ -28,9 +28,10 @@ class _CompaniesListView extends StatefulWidget {
 class _CompaniesListViewState extends State<_CompaniesListView>
     with AutomaticKeepAliveClientMixin {
   final TextEditingController _searchController = TextEditingController();
-  
+
   @override
-  bool get wantKeepAlive => false; // Don't keep state alive to ensure fresh data
+  bool get wantKeepAlive =>
+      false; // Don't keep state alive to ensure fresh data
 
   @override
   void initState() {
@@ -67,7 +68,8 @@ class _CompaniesListViewState extends State<_CompaniesListView>
             fontWeight: FontWeight.w600,
           ),
         ),
-        backgroundColor: const Color(0xFF005A9C), // Using the app's primary blue color
+        backgroundColor:
+            const Color(0xFF005A9C), // Using the app's primary blue color
         elevation: 2,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -156,7 +158,8 @@ class _CompaniesListViewState extends State<_CompaniesListView>
                 ),
                 filled: true,
                 fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
               onChanged: (value) {
                 context.read<CompanyManagementCubit>().searchCompanies(value);
@@ -170,7 +173,8 @@ class _CompaniesListViewState extends State<_CompaniesListView>
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFF005A9C).withOpacity(0.2)),
+              border:
+                  Border.all(color: const Color(0xFF005A9C).withOpacity(0.2)),
             ),
             child: Row(
               children: [
@@ -182,7 +186,9 @@ class _CompaniesListViewState extends State<_CompaniesListView>
                     if (state.isAllSelected) {
                       context.read<CompanyManagementCubit>().clearSelection();
                     } else {
-                      context.read<CompanyManagementCubit>().selectAllCompanies();
+                      context
+                          .read<CompanyManagementCubit>()
+                          .selectAllCompanies();
                     }
                   },
                 ),
@@ -192,8 +198,8 @@ class _CompaniesListViewState extends State<_CompaniesListView>
                         ? '${state.selectedCompanies.length} selected of ${state.filteredCompanies.length} companies'
                         : 'Select all companies',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -384,7 +390,8 @@ class _CompanyListItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: company.status.toLowerCase() == 'active'
                           ? Colors.green
@@ -569,9 +576,10 @@ class _BulkUpdateDialogState extends State<_BulkUpdateDialog> {
           ),
           BlocBuilder<CompanyManagementCubit, CompanyManagementState>(
             builder: (context, state) {
-              final isLoading = state.updateStatus == CompanyUpdateStatus.loading;
+              final isLoading =
+                  state.updateStatus == CompanyUpdateStatus.loading;
               final canUpdate = _hasChanges && !isLoading;
-              
+
               return ElevatedButton(
                 onPressed: canUpdate ? _submitBulkUpdate : null,
                 style: ElevatedButton.styleFrom(

@@ -71,15 +71,16 @@ class ApiService {
     print('DEBUG: Updating company with ID: $id');
     print('DEBUG: Endpoint: $endpoint');
     print('DEBUG: Request data: ${request.toJson()}');
-    
+
     try {
       final response = await dio.put(endpoint, data: request.toJson());
       print('DEBUG: Update response status: ${response.statusCode}');
       print('DEBUG: Update response data: ${response.data}');
-      
+
       // Check if the response indicates success
       if (response.statusCode != 200 && response.statusCode != 204) {
-        throw Exception('Update failed with status code: ${response.statusCode}');
+        throw Exception(
+            'Update failed with status code: ${response.statusCode}');
       }
     } catch (e) {
       print('DEBUG: Update error: $e');
@@ -92,15 +93,16 @@ class ApiService {
     print('DEBUG: Bulk updating companies');
     print('DEBUG: Endpoint: $endpoint');
     print('DEBUG: Request data: ${request.toJson()}');
-    
+
     try {
       final response = await dio.put(endpoint, data: request.toJson());
       print('DEBUG: Bulk update response status: ${response.statusCode}');
       print('DEBUG: Bulk update response data: ${response.data}');
-      
+
       // Check if the response indicates success
       if (response.statusCode != 200 && response.statusCode != 204) {
-        throw Exception('Bulk update failed with status code: ${response.statusCode}');
+        throw Exception(
+            'Bulk update failed with status code: ${response.statusCode}');
       }
     } catch (e) {
       print('DEBUG: Bulk update error: $e');

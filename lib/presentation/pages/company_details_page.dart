@@ -37,7 +37,8 @@ class _CompanyDetailsView extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        backgroundColor: const Color(0xFF005A9C), // Using the app's primary blue color
+        backgroundColor:
+            const Color(0xFF005A9C), // Using the app's primary blue color
         elevation: 2,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
@@ -45,7 +46,7 @@ class _CompanyDetailsView extends StatelessWidget {
             builder: (context, state) {
               if (state.selectedCompanyDetails != null) {
                 return IconButton(
-                  icon: const Icon(Icons.push_pin, color: Colors.white),
+                  icon: const Icon(Icons.edit, color: Colors.white),
                   tooltip: 'Edit Company',
                   onPressed: () =>
                       _showEditDialog(context, state.selectedCompanyDetails!),
@@ -130,7 +131,7 @@ class _CompanyDetailsView extends StatelessWidget {
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final isWideScreen = constraints.maxWidth > 800;
-                    
+
                     if (isWideScreen) {
                       // Wide screen: use two columns
                       return Column(
@@ -621,24 +622,26 @@ class _EditCompanyDialogState extends State<_EditCompanyDialog> {
 
   void _onFieldChanged() {
     final original = widget.company;
-    final hasTextChanges = _companyNameController.text != original.companyName ||
-        _emailController.text != original.email ||
-        _contactNoController.text != original.contactNo ||
-        _countryController.text != original.country ||
-        _cityController.text != original.city ||
-        _addressController.text != original.address ||
-        _webURLController.text != original.webURL ||
-        _apiurlController.text != original.apiurl ||
-        _crmurlController.text != original.crmurl ||
-        _procurementURLController.text != original.procurementURL ||
-        _reportsURLController.text != original.reportsURL ||
-        _leasingURLController.text != original.leasingURL ||
-        _tradingURLController.text != original.tradingURL ||
-        _integrationURLController.text != original.integrationURL ||
-        _fnbPosURLController.text != original.fnbPosURL ||
-        _retailPOSUrlController.text != original.retailPOSUrl ||
-        (_numberOfUsersController.text.isNotEmpty && 
-         int.tryParse(_numberOfUsersController.text) != original.numberOfUsers);
+    final hasTextChanges =
+        _companyNameController.text != original.companyName ||
+            _emailController.text != original.email ||
+            _contactNoController.text != original.contactNo ||
+            _countryController.text != original.country ||
+            _cityController.text != original.city ||
+            _addressController.text != original.address ||
+            _webURLController.text != original.webURL ||
+            _apiurlController.text != original.apiurl ||
+            _crmurlController.text != original.crmurl ||
+            _procurementURLController.text != original.procurementURL ||
+            _reportsURLController.text != original.reportsURL ||
+            _leasingURLController.text != original.leasingURL ||
+            _tradingURLController.text != original.tradingURL ||
+            _integrationURLController.text != original.integrationURL ||
+            _fnbPosURLController.text != original.fnbPosURL ||
+            _retailPOSUrlController.text != original.retailPOSUrl ||
+            (_numberOfUsersController.text.isNotEmpty &&
+                int.tryParse(_numberOfUsersController.text) !=
+                    original.numberOfUsers);
 
     final hasDropdownChanges = _selectedStatus != original.status ||
         _selectedEndDate != original.endJoinDate ||
@@ -678,7 +681,9 @@ class _EditCompanyDialogState extends State<_EditCompanyDialog> {
         if (state.updateStatus == CompanyUpdateStatus.success) {
           Navigator.of(context).pop();
           // Reload the company details to reflect the changes from the database
-          context.read<CompanyManagementCubit>().loadCompanyDetails(widget.company.id);
+          context
+              .read<CompanyManagementCubit>()
+              .loadCompanyDetails(widget.company.id);
         }
       },
       child: AlertDialog(
@@ -888,9 +893,10 @@ class _EditCompanyDialogState extends State<_EditCompanyDialog> {
           ),
           BlocBuilder<CompanyManagementCubit, CompanyManagementState>(
             builder: (context, state) {
-              final isLoading = state.updateStatus == CompanyUpdateStatus.loading;
+              final isLoading =
+                  state.updateStatus == CompanyUpdateStatus.loading;
               final canUpdate = _hasChanges && !isLoading;
-              
+
               return ElevatedButton(
                 onPressed: canUpdate ? _submitUpdate : null,
                 style: ElevatedButton.styleFrom(

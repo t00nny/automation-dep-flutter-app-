@@ -235,8 +235,9 @@ class CompanyUpdateRequest extends Equatable {
     if (address != null) json['address'] = address;
     if (webURL != null) json['webURL'] = webURL;
     if (apiurl != null) json['apiurl'] = apiurl;
-    if (endJoinDate != null)
+    if (endJoinDate != null) {
       json['endJoinDate'] = endJoinDate!.toIso8601String();
+    }
     if (status != null) json['status'] = status;
     if (modifiedBy != null) json['modifiedBy'] = modifiedBy;
     if (crmurl != null) json['crmurl'] = crmurl;
@@ -246,8 +247,9 @@ class CompanyUpdateRequest extends Equatable {
     if (logoText != null) json['logoText'] = logoText;
     if (tradingURL != null) json['tradingURL'] = tradingURL;
     if (integrationURL != null) json['integrationURL'] = integrationURL;
-    if (usesNewEncryption != null)
+    if (usesNewEncryption != null) {
       json['usesNewEncryption'] = usesNewEncryption;
+    }
     if (fnbPosURL != null) json['fnbPosURL'] = fnbPosURL;
     if (retailPOSUrl != null) json['retailPOSUrl'] = retailPOSUrl;
     if (numberOfUsers != null) json['numberOfUsers'] = numberOfUsers;
@@ -303,11 +305,13 @@ class BulkUpdateRequest extends Equatable {
     };
 
     if (numberOfUsers != null) json['numberOfUsers'] = numberOfUsers;
-    if (endJoinDate != null)
+    if (endJoinDate != null) {
       json['endJoinDate'] = endJoinDate!.toIso8601String();
+    }
     if (status != null) json['status'] = status;
-    if (usesNewEncryption != null)
+    if (usesNewEncryption != null) {
       json['usesNewEncryption'] = usesNewEncryption;
+    }
 
     return json;
   }

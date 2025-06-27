@@ -27,9 +27,13 @@ class CompanyManagementCubit extends Cubit<CompanyManagementState> {
 
   Future<void> loadCompanies() async {
     emit(state.copyWith(status: CompanyManagementStatus.loading));
+    print('DEBUG: Loading companies from API');
 
     try {
       final companies = await _getAllCompanies();
+      print('DEBUG: Loaded ${companies.length} companies from API');
+      print('DEBUG: First few companies: ${companies.take(3).map((c) => '${c.id}: ${c.companyName}').toList()}');
+      
       emit(state.copyWith(
         status: CompanyManagementStatus.success,
         companies: companies,
@@ -37,6 +41,7 @@ class CompanyManagementCubit extends Cubit<CompanyManagementState> {
         selectedCompanies: const {},
       ));
     } catch (e) {
+      print('DEBUG: Failed to load companies: $e');
       emit(state.copyWith(
         status: CompanyManagementStatus.failure,
         errorMessage: e.toString(),
@@ -46,14 +51,19 @@ class CompanyManagementCubit extends Cubit<CompanyManagementState> {
 
   Future<void> loadCompanyDetails(int companyId) async {
     emit(state.copyWith(detailsStatus: CompanyDetailsStatus.loading));
+    print('DEBUG: Loading company details for ID: $companyId');
 
     try {
       final company = await _getCompanyById(companyId);
+      print('DEBUG: Loaded company details: ${company.companyName} (${company.id})');
+      print('DEBUG: Company status: ${company.status}, Users: ${company.numberOfUsers}');
+      
       emit(state.copyWith(
         detailsStatus: CompanyDetailsStatus.success,
         selectedCompanyDetails: company,
       ));
     } catch (e) {
+      print('DEBUG: Failed to load company details: $e');
       emit(state.copyWith(
         detailsStatus: CompanyDetailsStatus.failure,
         errorMessage: e.toString(),
@@ -106,13 +116,19 @@ class CompanyManagementCubit extends Cubit<CompanyManagementState> {
 
   Future<void> updateSingleCompany(int id, CompanyUpdateRequest request) async {
     emit(state.copyWith(updateStatus: CompanyUpdateStatus.loading));
+    print('DEBUG: Starting single company update for ID: $id');
 
     try {
       await _updateCompany(id, request);
+      print('DEBUG: Single company update completed successfully');
       emit(state.copyWith(updateStatus: CompanyUpdateStatus.success));
+      
       // Reload companies to reflect changes
+      print('DEBUG: Reloading companies after single update');
       await loadCompanies();
+      print('DEBUG: Companies reloaded after single update');
     } catch (e) {
+      print('DEBUG: Single company update failed: $e');
       emit(state.copyWith(
         updateStatus: CompanyUpdateStatus.failure,
         errorMessage: e.toString(),
@@ -122,16 +138,22 @@ class CompanyManagementCubit extends Cubit<CompanyManagementState> {
 
   Future<void> bulkUpdate(BulkUpdateRequest request) async {
     emit(state.copyWith(updateStatus: CompanyUpdateStatus.loading));
+    print('DEBUG: Starting bulk update for ${request.companyIds.length} companies');
 
     try {
       await _bulkUpdateCompanies(request);
+      print('DEBUG: Bulk update completed successfully');
       emit(state.copyWith(
         updateStatus: CompanyUpdateStatus.success,
         selectedCompanies: const {},
       ));
+      
       // Reload companies to reflect changes
+      print('DEBUG: Reloading companies after bulk update');
       await loadCompanies();
+      print('DEBUG: Companies reloaded after bulk update');
     } catch (e) {
+      print('DEBUG: Bulk update failed: $e');
       emit(state.copyWith(
         updateStatus: CompanyUpdateStatus.failure,
         errorMessage: e.toString(),

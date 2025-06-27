@@ -91,7 +91,7 @@ class ReportGenerator {
       padding: const pw.EdgeInsets.all(16),
       decoration: pw.BoxDecoration(
         border: pw.Border.all(color: PdfColors.grey300),
-        borderRadius: pw.BorderRadius.all(pw.Radius.circular(8)),
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
         color: result.isSuccess ? PdfColors.green50 : PdfColors.red50,
       ),
       child: pw.Column(
@@ -184,7 +184,7 @@ class ReportGenerator {
       padding: const pw.EdgeInsets.all(16),
       decoration: pw.BoxDecoration(
         border: pw.Border.all(color: PdfColors.orange300),
-        borderRadius: pw.BorderRadius.all(pw.Radius.circular(8)),
+        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
         color: PdfColors.orange50,
       ),
       child: pw.Column(
@@ -192,7 +192,7 @@ class ReportGenerator {
         children: [
           pw.Row(
             children: [
-              pw.Icon(pw.IconData(0xe88f),
+              pw.Icon(const pw.IconData(0xe88f),
                   size: 20, color: PdfColors.orange800),
               pw.SizedBox(width: 8),
               pw.Text(
@@ -400,7 +400,7 @@ class ReportGenerator {
                   const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: pw.BoxDecoration(
                 color: PdfColors.blue100,
-                borderRadius: pw.BorderRadius.all(pw.Radius.circular(4)),
+                borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
                 border: pw.Border.all(color: PdfColors.blue300),
               ),
               child: pw.Text(
@@ -477,7 +477,7 @@ class ReportGenerator {
           padding: const pw.EdgeInsets.all(10),
           decoration: pw.BoxDecoration(
             border: pw.Border.all(color: PdfColors.red),
-            borderRadius: pw.BorderRadius.all(pw.Radius.circular(5)),
+            borderRadius: const pw.BorderRadius.all(pw.Radius.circular(5)),
             color: PdfColors.red50,
           ),
           child: pw.Text(

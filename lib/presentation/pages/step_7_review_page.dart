@@ -1,10 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:client_deployment_app/presentation/cubits/onboarding_cubit.dart';
-import 'package:client_deployment_app/presentation/widgets/wizard_scaffold.dart';
 import 'package:client_deployment_app/core/constants.dart';
 
 class ReviewPage extends StatelessWidget {

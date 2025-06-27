@@ -64,6 +64,9 @@ Future<void> setup() async {
   String baseUrl;
   if (Platform.isAndroid) {
     baseUrl = 'https://10.0.2.2:4335/';
+  } else if (Platform.isWindows) {
+    // For Windows desktop, use localhost or appropriate IP
+    baseUrl = 'https://localhost:4335/';
   } else {
     baseUrl = 'https://192.168.1.13:4335/';
   }

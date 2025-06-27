@@ -25,8 +25,28 @@ class _CompaniesListView extends StatefulWidget {
   State<_CompaniesListView> createState() => _CompaniesListViewState();
 }
 
-class _CompaniesListViewState extends State<_CompaniesListView> {
+class _CompaniesListViewState extends State<_CompaniesListView>
+    with AutomaticKeepAliveClientMixin {
   final TextEditingController _searchController = TextEditingController();
+  
+  @override
+  bool get wantKeepAlive => false; // Don't keep state alive to ensure fresh data
+
+  @override
+  void initState() {
+    super.initState();
+    // Ensure fresh data is loaded when the page is created
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CompanyManagementCubit>().loadCompanies();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh data when returning to this page
+    context.read<CompanyManagementCubit>().loadCompanies();
+  }
 
   @override
   void dispose() {
@@ -36,10 +56,20 @@ class _CompaniesListViewState extends State<_CompaniesListView> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Manage Companies'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text(
+          'Manage Companies',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: const Color(0xFF005A9C), // Using the app's primary blue color
+        elevation: 2,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: BlocConsumer<CompanyManagementCubit, CompanyManagementState>(
         listener: (context, state) {
@@ -83,62 +113,106 @@ class _CompaniesListViewState extends State<_CompaniesListView> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+        color: const Color(0xFF005A9C).withOpacity(0.05),
+        border: Border(
+          bottom: BorderSide(color: const Color(0xFF005A9C).withOpacity(0.2)),
+        ),
       ),
       child: Column(
         children: [
-          TextFormField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              labelText: 'Search companies...',
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _searchController.clear();
-                        context
-                            .read<CompanyManagementCubit>()
-                            .searchCompanies('');
-                        setState(() {});
-                      },
-                    )
-                  : null,
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            onChanged: (value) {
-              context.read<CompanyManagementCubit>().searchCompanies(value);
-              setState(() {});
-            },
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Checkbox(
-                value: state.isAllSelected,
-                tristate: true,
-                onChanged: (value) {
-                  if (state.isAllSelected) {
-                    context.read<CompanyManagementCubit>().clearSelection();
-                  } else {
-                    context.read<CompanyManagementCubit>().selectAllCompanies();
-                  }
-                },
-              ),
-              Text(
-                state.hasSelectedCompanies
-                    ? '${state.selectedCompanies.length} selected'
-                    : 'Select all',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: state.hasSelectedCompanies
-                    ? () => _showBulkUpdateDialog(context, state)
+            child: TextFormField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: 'Search companies...',
+                hintText: 'Search by name, number, status, database, or email',
+                prefixIcon: Icon(Icons.search, color: const Color(0xFF005A9C)),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          context
+                              .read<CompanyManagementCubit>()
+                              .searchCompanies('');
+                          setState(() {});
+                        },
+                      )
                     : null,
-                child: const Text('Bulk Update'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
-            ],
+              onChanged: (value) {
+                context.read<CompanyManagementCubit>().searchCompanies(value);
+                setState(() {});
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFF005A9C).withOpacity(0.2)),
+            ),
+            child: Row(
+              children: [
+                Checkbox(
+                  value: state.isAllSelected,
+                  tristate: true,
+                  activeColor: const Color(0xFF005A9C),
+                  onChanged: (value) {
+                    if (state.isAllSelected) {
+                      context.read<CompanyManagementCubit>().clearSelection();
+                    } else {
+                      context.read<CompanyManagementCubit>().selectAllCompanies();
+                    }
+                  },
+                ),
+                Expanded(
+                  child: Text(
+                    state.hasSelectedCompanies
+                        ? '${state.selectedCompanies.length} selected of ${state.filteredCompanies.length} companies'
+                        : 'Select all companies',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton.icon(
+                  onPressed: state.hasSelectedCompanies
+                      ? () => _showBulkUpdateDialog(context, state)
+                      : null,
+                  icon: const Icon(Icons.edit),
+                  label: const Text('Bulk Update'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF005A9C),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -243,50 +317,102 @@ class _CompanyListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: ListTile(
-        leading: Checkbox(
-          value: isSelected,
-          onChanged: (value) => onSelectionChanged(value ?? false),
-        ),
-        title: Text(
-          company.companyName,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Company No: ${company.companyNo}'),
-            if (company.endJoinDate != null)
-              Text('End Date: ${_formatDate(company.endJoinDate!)}'),
-            Text('Base DB: ${company.baseDB} | Data DB: ${company.dataDB}'),
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: company.status.toLowerCase() == 'active'
-                    ? Colors.green
-                    : Colors.orange,
-                borderRadius: BorderRadius.circular(12),
+      child: IntrinsicHeight(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              Checkbox(
+                value: isSelected,
+                onChanged: (value) => onSelectionChanged(value ?? false),
               ),
-              child: Text(
-                company.status,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(width: 8),
+              Expanded(
+                child: GestureDetector(
+                  onTap: onTap,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        company.companyName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Company No: ${company.companyNo}',
+                        style: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontSize: 14,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      if (company.endJoinDate != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          'End Date: ${_formatDate(company.endJoinDate!)}',
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 14,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ],
+                      const SizedBox(height: 2),
+                      Text(
+                        'Base DB: ${company.baseDB} | Data DB: ${company.dataDB}',
+                        style: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontSize: 13,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text('${company.numberOfUsers} users'),
-          ],
+              const SizedBox(width: 12),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: company.status.toLowerCase() == 'active'
+                          ? Colors.green
+                          : Colors.orange,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      company.status,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${company.numberOfUsers} users',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        onTap: onTap,
       ),
     );
   }
@@ -312,6 +438,25 @@ class _BulkUpdateDialogState extends State<_BulkUpdateDialog> {
   DateTime? _selectedEndDate;
   bool? _usesNewEncryption;
 
+  // Track if any fields have been changed
+  bool _hasChanges = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen to text changes
+    _numberOfUsersController.addListener(_onFieldChanged);
+  }
+
+  void _onFieldChanged() {
+    setState(() {
+      _hasChanges = _numberOfUsersController.text.isNotEmpty ||
+          _selectedStatus != null ||
+          _selectedEndDate != null ||
+          _usesNewEncryption != null;
+    });
+  }
+
   @override
   void dispose() {
     _numberOfUsersController.dispose();
@@ -323,7 +468,9 @@ class _BulkUpdateDialogState extends State<_BulkUpdateDialog> {
     return BlocListener<CompanyManagementCubit, CompanyManagementState>(
       listener: (context, state) {
         if (state.updateStatus == CompanyUpdateStatus.success) {
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(); // Close the dialog
+          // Navigate back to companies list (this is already the companies list page)
+          // The page will automatically refresh due to the state change
         }
       },
       child: AlertDialog(
@@ -362,7 +509,10 @@ class _BulkUpdateDialogState extends State<_BulkUpdateDialog> {
                     DropdownMenuItem(
                         value: 'Inactive', child: Text('Inactive')),
                   ],
-                  onChanged: (value) => setState(() => _selectedStatus = value),
+                  onChanged: (value) {
+                    setState(() => _selectedStatus = value);
+                    _onFieldChanged();
+                  },
                 ),
                 const SizedBox(height: 16),
                 InkWell(
@@ -376,6 +526,7 @@ class _BulkUpdateDialogState extends State<_BulkUpdateDialog> {
                     );
                     if (date != null) {
                       setState(() => _selectedEndDate = date);
+                      _onFieldChanged();
                     }
                   },
                   child: InputDecorator(
@@ -402,8 +553,10 @@ class _BulkUpdateDialogState extends State<_BulkUpdateDialog> {
                     DropdownMenuItem(value: true, child: Text('Yes')),
                     DropdownMenuItem(value: false, child: Text('No')),
                   ],
-                  onChanged: (value) =>
-                      setState(() => _usesNewEncryption = value),
+                  onChanged: (value) {
+                    setState(() => _usesNewEncryption = value);
+                    _onFieldChanged();
+                  },
                 ),
               ],
             ),
@@ -416,11 +569,16 @@ class _BulkUpdateDialogState extends State<_BulkUpdateDialog> {
           ),
           BlocBuilder<CompanyManagementCubit, CompanyManagementState>(
             builder: (context, state) {
+              final isLoading = state.updateStatus == CompanyUpdateStatus.loading;
+              final canUpdate = _hasChanges && !isLoading;
+              
               return ElevatedButton(
-                onPressed: state.updateStatus == CompanyUpdateStatus.loading
-                    ? null
-                    : _submitBulkUpdate,
-                child: state.updateStatus == CompanyUpdateStatus.loading
+                onPressed: canUpdate ? _submitBulkUpdate : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: canUpdate ? const Color(0xFF005A9C) : null,
+                  foregroundColor: canUpdate ? Colors.white : null,
+                ),
+                child: isLoading
                     ? const SizedBox(
                         width: 16,
                         height: 16,
@@ -436,6 +594,16 @@ class _BulkUpdateDialogState extends State<_BulkUpdateDialog> {
   }
 
   void _submitBulkUpdate() {
+    if (!_hasChanges) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please make at least one change before updating'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     if (_formKey.currentState!.validate()) {
       final request = BulkUpdateRequest(
         companyIds: widget.selectedCompanyIds,

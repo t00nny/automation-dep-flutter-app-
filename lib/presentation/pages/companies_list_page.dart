@@ -139,7 +139,7 @@ class _CompaniesListViewState extends State<_CompaniesListView>
               decoration: InputDecoration(
                 labelText: 'Search companies...',
                 hintText: 'Search by name, number, status, database, or email',
-                prefixIcon: Icon(Icons.search, color: const Color(0xFF005A9C)),
+                prefixIcon: const Icon(Icons.search, color: Color(0xFF005A9C)),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear),

@@ -29,53 +29,94 @@ class ModulesPage extends StatelessWidget {
               ListView(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                children: AppConstants.systemModules.entries.map((entry) {
-                  final moduleId = entry.key;
-                  final moduleName = entry.value;
-                  final isSelected = state.selectedModuleIds.contains(moduleId);
-                  final isMandatory =
-                      moduleId == AppConstants.userManagementModuleId;
-
-                  return Card(
-                    elevation: isSelected ? 2 : 1,
-                    // FIXED: Replaced deprecated withOpacity
-                    color: isSelected
-                        ? Theme.of(context)
-                            .colorScheme
-                            .primary
-                            .withAlpha((255 * 0.1).round())
-                        : null,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: isSelected
-                          ? BorderSide(
-                              color: Theme.of(context).colorScheme.primary)
-                          : BorderSide(color: Colors.grey.shade200),
-                    ),
-                    child: CheckboxListTile(
-                      title: Text(moduleName,
-                          style: TextStyle(
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal)),
-                      value: isSelected,
-                      onChanged: isMandatory
-                          ? null
-                          : (bool? value) {
-                              context
-                                  .read<OnboardingCubit>()
-                                  .toggleModule(moduleId);
-                            },
-                      controlAffinity: ListTileControlAffinity.leading,
-                      activeColor: Theme.of(context).colorScheme.primary,
-                    ),
-                  );
-                }).toList(),
+                children: _buildModulesList(context, state),
               ),
             ],
           ),
         );
       },
     );
+  }
+
+  List<Widget> _buildModulesList(BuildContext context, OnboardingState state) {
+    // Get all module entries
+    final allModules = AppConstants.systemModules.entries.toList();
+
+    // Find User Management module
+    final userManagementEntry = allModules.firstWhere(
+      (entry) => entry.key == AppConstants.userManagementModuleId,
+    );
+
+    // Get all other modules except User Management
+    final otherModules = allModules.where(
+      (entry) => entry.key != AppConstants.userManagementModuleId,
+    ).toList();
+
+    // Sort other modules alphabetically by name
+    otherModules.sort((a, b) => a.value.compareTo(b.value));
+
+    // Create the ordered list: User Management first, then others
+    final orderedModules = [userManagementEntry, ...otherModules];
+
+    return orderedModules.map((entry) {
+      final moduleId = entry.key;
+      final moduleName = entry.value;
+      final isSelected = state.selectedModuleIds.contains(moduleId);
+      final isMandatory = moduleId == AppConstants.userManagementModuleId;
+
+      return Card(
+        elevation: isSelected ? 2 : 1,
+        color: isSelected
+            ? Theme.of(context)
+                .colorScheme
+                .primary
+                .withAlpha((255 * 0.1).round())
+            : null,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: isSelected
+              ? BorderSide(color: Theme.of(context).colorScheme.primary)
+              : BorderSide(color: Colors.grey.shade200),
+        ),
+        child: CheckboxListTile(
+          title: Row(
+            children: [
+              Text(
+                moduleName,
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+              if (isMandatory) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text(
+                    'Required',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          value: isSelected,
+          onChanged: isMandatory
+              ? null
+              : (bool? value) {
+                  context.read<OnboardingCubit>().toggleModule(moduleId);
+                },
+          controlAffinity: ListTileControlAffinity.leading,
+          activeColor: Theme.of(context).colorScheme.primary,
+        ),
+      );
+    }).toList();
   }
 }

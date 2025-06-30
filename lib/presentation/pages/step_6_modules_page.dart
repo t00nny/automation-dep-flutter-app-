@@ -48,9 +48,11 @@ class ModulesPage extends StatelessWidget {
     );
 
     // Get all other modules except User Management
-    final otherModules = allModules.where(
-      (entry) => entry.key != AppConstants.userManagementModuleId,
-    ).toList();
+    final otherModules = allModules
+        .where(
+          (entry) => entry.key != AppConstants.userManagementModuleId,
+        )
+        .toList();
 
     // Sort other modules alphabetically by name
     otherModules.sort((a, b) => a.value.compareTo(b.value));
@@ -90,7 +92,8 @@ class ModulesPage extends StatelessWidget {
               if (isMandatory) ...[
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primary,
                     borderRadius: BorderRadius.circular(12),

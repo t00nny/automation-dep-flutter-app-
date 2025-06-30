@@ -16,13 +16,12 @@ void main() {
     // FIXED: Replaced the incorrect 'MyApp' with the actual app widget 'ClientDeploymentApp'.
     await tester.pumpWidget(const ClientDeploymentApp());
 
-    // The app shows a splash screen for a few seconds, so we need to
-    // advance the timer to get to the welcome page.
-    await tester.pump(const Duration(seconds: 3));
+    // Pump a frame to allow the app to render the welcome page.
+    await tester.pumpAndSettle();
 
     // MODIFIED: The test now verifies that the welcome page content is visible,
     // instead of looking for a counter.
-    expect(find.text('Automated Client Onboarding'), findsOneWidget);
+    expect(find.text('Deploy 360'), findsOneWidget);
     expect(find.text('Start New Onboarding'), findsOneWidget);
 
     // Verify that the initial counter text from the template is not present.

@@ -1,5 +1,4 @@
 import 'package:go_router/go_router.dart';
-import 'package:client_deployment_app/presentation/pages/splash_page.dart';
 import 'package:client_deployment_app/presentation/pages/welcome_page.dart';
 import 'package:client_deployment_app/presentation/pages/step_1_client_details_page.dart';
 import 'package:client_deployment_app/presentation/pages/step_2_company_info_page.dart';
@@ -16,9 +15,8 @@ import 'package:client_deployment_app/presentation/pages/company_details_page.da
 
 class AppRouter {
   static final router = GoRouter(
-    initialLocation: '/splash',
+    initialLocation: '/welcome',
     routes: [
-      GoRoute(path: '/splash', builder: (context, state) => const SplashPage()),
       GoRoute(
           path: '/welcome', builder: (context, state) => const WelcomePage()),
       GoRoute(

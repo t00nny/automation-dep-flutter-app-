@@ -73,7 +73,7 @@ cd automation-dep-flutter-app
 flutter pub get
 ```
 
-### 3. Generate Icons (Optional)
+### 3. Generate Icons
 ```bash
 flutter pub run flutter_launcher_icons:main
 ```

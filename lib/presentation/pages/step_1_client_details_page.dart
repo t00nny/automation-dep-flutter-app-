@@ -18,6 +18,18 @@ class _ClientDetailsPageState extends State<ClientDetailsPage> {
 
   void _onNextPressed() async {
     if (_formKey.currentState!.validate()) {
+      // Check if logo is selected
+      final state = context.read<OnboardingCubit>().state;
+      if (state.clientLogoFile == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select a client logo before proceeding.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       // Clear any previous validation errors
       context.read<OnboardingCubit>().clearDatabaseValidationError();
 
@@ -25,8 +37,8 @@ class _ClientDetailsPageState extends State<ClientDetailsPage> {
       await context.read<OnboardingCubit>().validateClientDatabase();
 
       // Check if validation passed
-      final state = context.read<OnboardingCubit>().state;
-      if (state.databaseValidationError == null) {
+      final updatedState = context.read<OnboardingCubit>().state;
+      if (updatedState.databaseValidationError == null) {
         context.push('/step2');
       }
     }
@@ -42,8 +54,9 @@ class _ClientDetailsPageState extends State<ClientDetailsPage> {
             title: 'Step 1: Client Details',
             currentStep: 1, // ADDED
             totalSteps: 7, // ADDED
-            isNextEnabled:
-                state.clientName.isNotEmpty && !state.isCheckingDatabase,
+            isNextEnabled: state.clientName.isNotEmpty &&
+                state.clientLogoFile != null &&
+                !state.isCheckingDatabase,
             onNext: _onNextPressed,
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,11 +121,24 @@ class _ClientDetailsPageState extends State<ClientDetailsPage> {
                 const SizedBox(height: 24),
 
                 // Client Logo Section
-                Text(
-                  'Client Logo',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                Row(
+                  children: [
+                    Text(
+                      'Client Logo',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '*',
+                      style: TextStyle(
+                        color: Colors.red.shade600,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 Container(
@@ -171,10 +197,11 @@ class _ClientDetailsPageState extends State<ClientDetailsPage> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Upload a logo for this client',
+                          'Upload a logo for this client (Required)',
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         const SizedBox(height: 4),

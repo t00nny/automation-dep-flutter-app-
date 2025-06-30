@@ -28,21 +28,35 @@ class ApiService {
     try {
       const endpoint = 'api/LogoUpload/upload';
 
+      // Validate file exists and is readable
+      if (!logoFile.existsSync()) {
+        throw Exception('Logo file does not exist');
+      }
+
       // Create form data for file upload
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(
           logoFile.path,
-          filename: logoFile.path.split('/').last,
+          filename: logoFile.path.split(Platform.pathSeparator).last,
         ),
       });
 
       final response = await dio.post(endpoint, data: formData);
 
+      // Validate response and extract URL
       if (response.statusCode == 200 && response.data is Map) {
-        return response.data['url'] as String?;
+        final url = response.data['url'] as String?;
+        
+        // Validate that we received a proper URL
+        if (url != null && url.isNotEmpty && url.startsWith('http')) {
+          return url;
+        }
       }
-      return null;
+      
+      throw Exception('Invalid response from logo upload service');
     } catch (e) {
+      // Log error for debugging but don't expose internal details
+      print('Logo upload failed: $e');
       return null;
     }
   }

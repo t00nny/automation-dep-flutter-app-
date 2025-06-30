@@ -242,44 +242,99 @@ class OnboardingCubit extends Cubit<OnboardingState> {
     emit(state.copyWith(clearDatabaseError: true));
   }
 
+  /// Uploads the client logo and returns the URL
+  /// This method ensures the logo is uploaded via POST /api/LogoUpload/upload
+  /// before the ClientDeployment process begins
+  Future<String?> _uploadClientLogo(File logoFile) async {
+    try {
+      final logoUrl = await _uploadLogo(logoFile);
+
+      if (logoUrl == null || logoUrl.isEmpty) {
+        throw Exception('Logo upload service returned null or empty URL');
+      }
+
+      if (!logoUrl.startsWith('http')) {
+        throw Exception('Invalid logo URL format received: $logoUrl');
+      }
+
+      return logoUrl;
+    } catch (e) {
+      // Log the error for debugging
+      print('Logo upload error: $e');
+      return null;
+    }
+  }
+
+  /// Submits the client deployment request
+  ///
+  /// CRITICAL FLOW:
+  /// 1. First uploads logo via POST /api/LogoUpload/upload (if logo exists)
+  /// 2. Obtains logo URL from the upload response
+  /// 3. Includes the logo URL in the CompanyUrls.logoUrl field
+  /// 4. Then calls POST /api/ClientDeployment/deploy with the complete request
+  ///
+  /// The ClientDeployment API depends on the logo URL being available,
+  /// so logo upload MUST complete successfully before deployment begins.
   Future<void> submitDeployment() async {
     emit(state.copyWith(deploymentStatus: DeploymentStatus.loading));
 
     try {
-      // Step 1: Upload logo if exists
+      // Step 1: Upload logo first if exists - this is REQUIRED before deployment
       String? logoUrl;
       if (state.clientLogoFile != null) {
-        logoUrl = await _uploadLogo(state.clientLogoFile!);
-        if (logoUrl == null) {
+        emit(state.copyWith(
+          deploymentStatus: DeploymentStatus.loading,
+          errorMessage: 'Uploading logo...',
+        ));
+
+        logoUrl = await _uploadClientLogo(state.clientLogoFile!);
+        if (logoUrl == null || logoUrl.isEmpty) {
           emit(state.copyWith(
             deploymentStatus: DeploymentStatus.failure,
-            errorMessage: 'Failed to upload logo. Please try again.',
+            errorMessage:
+                'Failed to upload logo. Logo upload is required before deployment. Please try again.',
           ));
           return;
         }
       }
 
       // Step 2: Prepare deployment request with logo URL
+      emit(state.copyWith(
+        deploymentStatus: DeploymentStatus.loading,
+        errorMessage: 'Preparing deployment...',
+      ));
+
       final allCompanies = List<CompanyInfo>.from(state.companies);
       if (state.testCompany != null) {
         allCompanies.add(state.testCompany!);
       }
 
-      // Update URLs with logo URL if uploaded
+      // CRITICAL: Update company logo URLs if a logo was uploaded
+      final updatedCompanies = logoUrl != null
+          ? allCompanies.map((c) => c.copyWith(logoUrl: logoUrl)).toList()
+          : allCompanies;
+
+      // CRITICAL: Update URLs with logo URL if uploaded
+      // The ClientDeployment API requires the logo URL to be included
       final updatedUrls =
           logoUrl != null ? state.urls.copyWith(logoUrl: logoUrl) : state.urls;
 
       final request = ClientDeploymentRequest(
         clientName: state.clientName,
         databaseTypePrefix: state.databaseTypePrefix,
-        companies: allCompanies,
+        companies: updatedCompanies, // Use the updated list
         adminUser: state.adminUser,
         license: state.license,
         selectedModuleIds: state.selectedModuleIds,
-        urls: updatedUrls,
+        urls: updatedUrls, // Contains the uploaded logo URL
       );
 
-      // Step 3: Deploy client
+      // Step 3: Deploy client with the logo URL included
+      emit(state.copyWith(
+        deploymentStatus: DeploymentStatus.loading,
+        errorMessage: 'Deploying client...',
+      ));
+
       final result = await _deployClient(request);
 
       emit(state.copyWith(

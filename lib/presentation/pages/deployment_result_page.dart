@@ -136,21 +136,17 @@ class DeploymentResultPage extends StatelessWidget {
                           'Companies Configuration', Icons.domain, [
                         _buildReportItem('Total Companies',
                             '${request.companies.length + (state.testCompany != null ? 1 : 0)}'),
-                        ...request.companies
-                            .map((company) => Column(
-                                  children: [
-                                    const Divider(),
-                                    _buildReportItem(
-                                        'Company Name', company.companyName),
-                                    _buildReportItem('Address',
-                                        '${company.address1}, ${company.city}'),
-                                    _buildReportItem(
-                                        'Phone', company.phoneNumber),
-                                    _buildReportItem(
-                                        'Country', company.country),
-                                  ],
-                                ))
-                            .toList(),
+                        ...request.companies.map((company) => Column(
+                              children: [
+                                const Divider(),
+                                _buildReportItem(
+                                    'Company Name', company.companyName),
+                                _buildReportItem('Address',
+                                    '${company.address1}, ${company.city}'),
+                                _buildReportItem('Phone', company.phoneNumber),
+                                _buildReportItem('Country', company.country),
+                              ],
+                            )),
                       ]),
                       _buildReportCard(
                           'Administrator Account', Icons.admin_panel_settings, [

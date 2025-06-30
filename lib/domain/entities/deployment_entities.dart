@@ -182,6 +182,9 @@ class CompanyUrls extends Equatable {
   final bool fnbPosURLEnabled;
   final String retailPOSUrl;
   final bool retailPOSUrlEnabled;
+  
+  // Logo URL obtained from POST /api/LogoUpload/upload API
+  // This URL is required by the ClientDeployment API
   final String logoUrl;
 
   const CompanyUrls({

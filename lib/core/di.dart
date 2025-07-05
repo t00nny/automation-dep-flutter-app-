@@ -15,11 +15,7 @@ import 'package:client_deployment_app/domain/usecases/bulk_update_companies.dart
 import 'package:client_deployment_app/presentation/cubits/onboarding_cubit.dart';
 import 'package:client_deployment_app/presentation/cubits/company_management_cubit.dart';
 import 'package:flutter/foundation.dart';
-// --- START OF FIX ---
-// Added the necessary imports for HttpClient, X509Certificate, and IOHttpClientAdapter
-import 'dart:io' show HttpClient, Platform, X509Certificate;
-import 'package:dio/io.dart';
-// --- END OF FIX ---
+import 'dart:io' show Platform;
 
 final sl = GetIt.instance;
 
@@ -63,12 +59,12 @@ Future<void> setup() async {
   // External
   String baseUrl;
   if (Platform.isAndroid) {
-    baseUrl = 'http://192.168.1.13:4335/';
+    baseUrl = 'https://deploy.apps.pro360erp.com/';
   } else if (Platform.isWindows) {
-    // For Windows desktop, use localhost or appropriate IP
-    baseUrl = 'https://localhost:4335/';
+    // For Windows desktop, use the deployed API
+    baseUrl = 'https://deploy.apps.pro360erp.com/';
   } else {
-    baseUrl = 'https://192.168.1.13:4335/';
+    baseUrl = 'https://deploy.apps.pro360erp.com/';
   }
 
   final dio = Dio(
@@ -83,16 +79,8 @@ Future<void> setup() async {
     ),
   );
 
-  // This block for bypassing SSL certificate validation is now correct
-  // because the required classes have been imported.
-  if (kDebugMode) {
-    (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-      final client = HttpClient();
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-      return client;
-    };
-  }
+  // Remove SSL certificate bypass for production API
+  // The deployed API should have proper SSL certificates
 
   if (kDebugMode) {
     dio.interceptors.add(LogInterceptor(

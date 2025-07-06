@@ -476,8 +476,8 @@ class _BulkUpdateDialogState extends State<_BulkUpdateDialog> {
       listener: (context, state) {
         if (state.updateStatus == CompanyUpdateStatus.success) {
           Navigator.of(context).pop(); // Close the dialog
-          // Navigate back to companies list (this is already the companies list page)
-          // The page will automatically refresh due to the state change
+          // Navigate back to companies list page and refresh data
+          context.go('/companies');
         }
       },
       child: AlertDialog(

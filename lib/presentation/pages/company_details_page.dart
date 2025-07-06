@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:client_deployment_app/core/di.dart' as di;
 import 'package:client_deployment_app/domain/entities/company_entities.dart';
 import 'package:client_deployment_app/presentation/cubits/company_management_cubit.dart';
@@ -77,10 +78,8 @@ class _CompanyDetailsView extends StatelessWidget {
               ),
             );
             context.read<CompanyManagementCubit>().resetUpdateStatus();
-            // Reload the company details
-            context
-                .read<CompanyManagementCubit>()
-                .loadCompanyDetails(companyId);
+            // Navigate back to companies list page
+            context.go('/companies');
           }
         },
         builder: (context, state) {
@@ -680,10 +679,8 @@ class _EditCompanyDialogState extends State<_EditCompanyDialog> {
       listener: (context, state) {
         if (state.updateStatus == CompanyUpdateStatus.success) {
           Navigator.of(context).pop();
-          // Reload the company details to reflect the changes from the database
-          context
-              .read<CompanyManagementCubit>()
-              .loadCompanyDetails(widget.company.id);
+          // Navigate back to companies list page and refresh data
+          context.go('/companies');
         }
       },
       child: AlertDialog(

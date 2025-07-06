@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:client_deployment_app/core/constants.dart';
+import 'package:client_deployment_app/core/utils/database_validator.dart';
 import 'package:client_deployment_app/presentation/cubits/onboarding_cubit.dart';
 import 'package:client_deployment_app/presentation/widgets/wizard_scaffold.dart';
 import 'package:client_deployment_app/presentation/widgets/custom_text_form_field.dart';
@@ -83,12 +84,68 @@ class _ClientDetailsPageState extends State<ClientDetailsPage> {
                     if (value == null || value.trim().isEmpty) {
                       return 'Client name is required.';
                     }
-                    if (value.length < 2) {
-                      return 'Client name must be at least 2 characters.';
+
+                    // Use database validator to check if client name is valid for database use
+                    final databaseError =
+                        DatabaseValidator.validateDatabaseName(value);
+                    if (databaseError != null) {
+                      return databaseError;
                     }
+
                     return null;
                   },
                 ),
+
+                // Database name preview
+                if (state.clientName.isNotEmpty)
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.blue.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.preview_outlined,
+                          color: Colors.blue.shade700,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Database Name Preview:',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.blue.shade700,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                DatabaseValidator.generateDatabasePreview(
+                                  state.clientName,
+                                  state.databaseTypePrefix,
+                                ),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue.shade900,
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                 const SizedBox(height: 24),
                 DropdownButtonFormField<String>(
                   value: state.databaseTypePrefix,
@@ -118,6 +175,55 @@ class _ClientDetailsPageState extends State<ClientDetailsPage> {
                     }
                   },
                 ),
+
+                // Database naming guidelines
+                Container(
+                  margin: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.amber.shade200),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: Colors.amber.shade700,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Database Naming Guidelines:',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.amber.shade700,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '• Must be 2-50 characters long\n'
+                              '• Cannot start with numbers\n'
+                              '• Use letters, numbers, spaces, hyphens, periods only\n'
+                              '• Cannot be a reserved database keyword',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.amber.shade800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
                 const SizedBox(height: 24),
 
                 // Client Logo Section

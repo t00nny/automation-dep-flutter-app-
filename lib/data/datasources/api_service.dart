@@ -24,7 +24,7 @@ class ApiService {
     return response.data as bool;
   }
 
-  Future<String?> uploadLogo(File logoFile) async {
+  Future<String?> uploadLogo(File logoFile, {String? customFilename}) async {
     try {
       const endpoint = 'api/LogoUpload/upload';
 
@@ -33,11 +33,22 @@ class ApiService {
         throw Exception('Logo file does not exist');
       }
 
+      // Get file extension from original file
+      final originalFilename = logoFile.path.split(Platform.pathSeparator).last;
+      final fileExtension = originalFilename.contains('.')
+          ? '.${originalFilename.split('.').last}'
+          : '.png'; // Default to .png if no extension found
+
+      // Use custom filename if provided, otherwise use original filename
+      final filename = customFilename != null
+          ? '$customFilename$fileExtension'
+          : originalFilename;
+
       // Create form data for file upload
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(
           logoFile.path,
-          filename: logoFile.path.split(Platform.pathSeparator).last,
+          filename: filename,
         ),
       });
 
@@ -46,13 +57,13 @@ class ApiService {
       // Validate response and extract URL
       if (response.statusCode == 200 && response.data is Map) {
         final url = response.data['url'] as String?;
-        
+
         // Validate that we received a proper URL
         if (url != null && url.isNotEmpty && url.startsWith('http')) {
           return url;
         }
       }
-      
+
       throw Exception('Invalid response from logo upload service');
     } catch (e) {
       // Log error for debugging but don't expose internal details

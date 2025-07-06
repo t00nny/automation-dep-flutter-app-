@@ -5,5 +5,5 @@ abstract class DeploymentRepository {
   Future<DeploymentResult> deployClient(ClientDeploymentRequest request);
   Future<bool> checkDatabaseExists(
       String databaseTypePrefix, String clientName);
-  Future<String?> uploadLogo(File logoFile);
+  Future<String?> uploadLogo(File logoFile, {String? customFilename});
 }

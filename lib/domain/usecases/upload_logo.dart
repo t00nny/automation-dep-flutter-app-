@@ -6,7 +6,7 @@ class UploadLogo {
 
   UploadLogo({required this.repository});
 
-  Future<String?> call(File logoFile) {
-    return repository.uploadLogo(logoFile);
+  Future<String?> call(File logoFile, {String? customFilename}) {
+    return repository.uploadLogo(logoFile, customFilename: customFilename);
   }
 }

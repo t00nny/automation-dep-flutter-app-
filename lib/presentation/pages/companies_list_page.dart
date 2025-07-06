@@ -72,6 +72,10 @@ class _CompaniesListViewState extends State<_CompaniesListView>
             const Color(0xFF005A9C), // Using the app's primary blue color
         elevation: 2,
         iconTheme: const IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.go('/welcome'),
+        ),
       ),
       body: BlocConsumer<CompanyManagementCubit, CompanyManagementState>(
         listener: (context, state) {

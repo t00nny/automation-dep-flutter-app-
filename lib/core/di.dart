@@ -71,7 +71,7 @@ Future<void> setup() async {
     BaseOptions(
       baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 60),
-      receiveTimeout: const Duration(minutes: 15),
+      receiveTimeout: const Duration(minutes: 30),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',

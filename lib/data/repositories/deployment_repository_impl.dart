@@ -47,9 +47,10 @@ class DeploymentRepositoryImpl implements DeploymentRepository {
   }
 
   @override
-  Future<String?> uploadLogo(File logoFile) async {
+  Future<String?> uploadLogo(File logoFile, {String? customFilename}) async {
     try {
-      return await apiService.uploadLogo(logoFile);
+      return await apiService.uploadLogo(logoFile,
+          customFilename: customFilename);
     } catch (e) {
       return null;
     }

@@ -245,9 +245,15 @@ class OnboardingCubit extends Cubit<OnboardingState> {
   /// Uploads the client logo and returns the URL
   /// This method ensures the logo is uploaded via POST /api/LogoUpload/upload
   /// before the ClientDeployment process begins
+  /// The logo file will be renamed to include the client name for easy identification
   Future<String?> _uploadClientLogo(File logoFile) async {
     try {
-      final logoUrl = await _uploadLogo(logoFile);
+      // Create a sanitized filename from client name
+      final sanitizedClientName = _sanitizeFilename(state.clientName.trim());
+      final customFilename = sanitizedClientName;
+
+      final logoUrl =
+          await _uploadLogo(logoFile, customFilename: customFilename);
 
       if (logoUrl == null || logoUrl.isEmpty) {
         throw Exception('Logo upload service returned null or empty URL');
@@ -263,6 +269,23 @@ class OnboardingCubit extends Cubit<OnboardingState> {
       print('Logo upload error: $e');
       return null;
     }
+  }
+
+  /// Sanitizes the client name to be safe for use as a filename
+  /// Removes or replaces characters that are not safe for filenames
+  String _sanitizeFilename(String input) {
+    // Remove or replace unsafe characters for filenames
+    // Keep only alphanumeric characters, hyphens, and underscores
+    return input
+        .toLowerCase()
+        .replaceAll(
+            RegExp(r"['`]"), '') // Remove apostrophes and backticks entirely
+        .replaceAll(RegExp(r'[^a-z0-9\-_]'),
+            '_') // Replace other non-alphanumeric with underscore
+        .replaceAll(
+            RegExp(r'_+'), '_') // Replace multiple underscores with single
+        .replaceAll(
+            RegExp(r'^_|_$'), ''); // Remove leading/trailing underscores
   }
 
   /// Submits the client deployment request

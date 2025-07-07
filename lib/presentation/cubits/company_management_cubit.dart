@@ -124,12 +124,15 @@ class CompanyManagementCubit extends Cubit<CompanyManagementState> {
     try {
       await _updateCompany(id, request);
       print('DEBUG: Single company update completed successfully');
-      emit(state.copyWith(updateStatus: CompanyUpdateStatus.success));
 
-      // Reload companies to reflect changes
+      // Reload companies to reflect changes first
       print('DEBUG: Reloading companies after single update');
-      await loadCompanies();
+      await _reloadCompaniesAfterUpdate();
       print('DEBUG: Companies reloaded after single update');
+
+      // Then emit success state
+      emit(state.copyWith(updateStatus: CompanyUpdateStatus.success));
+      print('DEBUG: Update success state emitted');
     } catch (e) {
       print('DEBUG: Single company update failed: $e');
       emit(state.copyWith(
@@ -147,21 +150,48 @@ class CompanyManagementCubit extends Cubit<CompanyManagementState> {
     try {
       await _bulkUpdateCompanies(request);
       print('DEBUG: Bulk update completed successfully');
+
+      // Reload companies to reflect changes first
+      print('DEBUG: Reloading companies after bulk update');
+      await _reloadCompaniesAfterUpdate();
+      print('DEBUG: Companies reloaded after bulk update');
+
+      // Then emit success state
       emit(state.copyWith(
         updateStatus: CompanyUpdateStatus.success,
         selectedCompanies: const {},
       ));
-
-      // Reload companies to reflect changes
-      print('DEBUG: Reloading companies after bulk update');
-      await loadCompanies();
-      print('DEBUG: Companies reloaded after bulk update');
     } catch (e) {
       print('DEBUG: Bulk update failed: $e');
       emit(state.copyWith(
         updateStatus: CompanyUpdateStatus.failure,
         errorMessage: e.toString(),
       ));
+    }
+  }
+
+  // Private method to reload companies after update without affecting update status
+  Future<void> _reloadCompaniesAfterUpdate() async {
+    try {
+      final companies = await _getAllCompanies();
+      print('DEBUG: Loaded ${companies.length} companies after update');
+
+      // Update companies data without changing the main status or update status
+      emit(state.copyWith(
+        companies: companies,
+        filteredCompanies: state.searchQuery.isEmpty
+            ? companies
+            : companies.where((company) {
+                final lowerQuery = state.searchQuery.toLowerCase();
+                return company.companyName.toLowerCase().contains(lowerQuery) ||
+                    company.companyNo.toLowerCase().contains(lowerQuery) ||
+                    company.email.toLowerCase().contains(lowerQuery);
+              }).toList(),
+      ));
+    } catch (e) {
+      print('DEBUG: Failed to reload companies after update: $e');
+      // Don't emit failure state here as the update itself was successful
+      // The user can manually refresh if needed
     }
   }
 
@@ -189,5 +219,11 @@ class CompanyManagementCubit extends Cubit<CompanyManagementState> {
 
   void resetUpdateStatus() {
     emit(state.copyWith(updateStatus: CompanyUpdateStatus.initial));
+  }
+
+  // Force reload companies (public method)
+  Future<void> forceReloadCompanies() async {
+    print('DEBUG: Force reloading companies');
+    await loadCompanies();
   }
 }

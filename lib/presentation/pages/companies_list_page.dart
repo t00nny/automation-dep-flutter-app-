@@ -38,7 +38,7 @@ class _CompaniesListViewState extends State<_CompaniesListView>
     super.initState();
     // Ensure fresh data is loaded when the page is created
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CompanyManagementCubit>().loadCompanies();
+      context.read<CompanyManagementCubit>().forceReloadCompanies();
     });
   }
 
@@ -46,7 +46,10 @@ class _CompaniesListViewState extends State<_CompaniesListView>
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Refresh data when returning to this page
-    context.read<CompanyManagementCubit>().loadCompanies();
+    // Use a post-frame callback to ensure the widget is fully built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CompanyManagementCubit>().forceReloadCompanies();
+    });
   }
 
   @override
@@ -76,6 +79,26 @@ class _CompaniesListViewState extends State<_CompaniesListView>
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.go('/welcome'),
         ),
+        actions: [
+          BlocBuilder<CompanyManagementCubit, CompanyManagementState>(
+            builder: (context, state) {
+              if (state.updateStatus == CompanyUpdateStatus.loading) {
+                return const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
       ),
       body: BlocConsumer<CompanyManagementCubit, CompanyManagementState>(
         listener: (context, state) {
@@ -208,11 +231,24 @@ class _CompaniesListViewState extends State<_CompaniesListView>
                 ),
                 const SizedBox(width: 12),
                 ElevatedButton.icon(
-                  onPressed: state.hasSelectedCompanies
+                  onPressed: state.hasSelectedCompanies &&
+                          state.updateStatus != CompanyUpdateStatus.loading
                       ? () => _showBulkUpdateDialog(context, state)
                       : null,
-                  icon: const Icon(Icons.edit),
-                  label: const Text('Bulk Update'),
+                  icon: state.updateStatus == CompanyUpdateStatus.loading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Icon(Icons.edit),
+                  label: Text(state.updateStatus == CompanyUpdateStatus.loading
+                      ? 'Updating...'
+                      : 'Bulk Update'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF005A9C),
                     foregroundColor: Colors.white,
@@ -230,7 +266,9 @@ class _CompaniesListViewState extends State<_CompaniesListView>
   }
 
   Widget _buildCompanyList(BuildContext context, CompanyManagementState state) {
-    if (state.status == CompanyManagementStatus.loading) {
+    // Show loading only if we're loading companies and don't have any existing data
+    if (state.status == CompanyManagementStatus.loading &&
+        state.companies.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 

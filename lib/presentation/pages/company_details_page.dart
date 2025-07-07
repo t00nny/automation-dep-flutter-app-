@@ -78,8 +78,6 @@ class _CompanyDetailsView extends StatelessWidget {
               ),
             );
             context.read<CompanyManagementCubit>().resetUpdateStatus();
-            // Navigate back to companies list page
-            context.go('/companies');
           }
         },
         builder: (context, state) {
@@ -680,7 +678,17 @@ class _EditCompanyDialogState extends State<_EditCompanyDialog> {
         if (state.updateStatus == CompanyUpdateStatus.success) {
           Navigator.of(context).pop();
           // Navigate back to companies list page and refresh data
-          context.go('/companies');
+          // Add a small delay to ensure data is processed
+          Future.delayed(const Duration(milliseconds: 100), () {
+            context.go('/companies');
+          });
+        } else if (state.updateStatus == CompanyUpdateStatus.failure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.errorMessage ?? 'Update failed'),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       },
       child: AlertDialog(
